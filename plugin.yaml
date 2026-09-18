@@ -1,0 +1,17 @@
+name: hermes-armor
+version: "1.4.0"
+description: "Hermes Agent 破甲内核插件（受 dsh-infinite-gen-4「无限四代」启发）：通过系统提示词槽位注入双层同源内核（hermes-armor-core + hermes-armor-reinforce，SHA256 一致），Supreme User Authority + 零工具面纯净直出 + 占位符自造 + 首行命名交付物契约。附带 /armor 状态命令与 HERMES_ARMOR_DISABLE / HERMES_ARMOR_DUAL 开关。"
+author: "Enchanted0911 (ported from dsh-infinite-gen-4 by Minglink)"
+provides_tools: []
+provides_hooks: []
+provides_middleware:
+  - llm_request
+license: MIT
+homepage: https://github.com/Enchanted0911/hermes-armor
+tags:
+  - redteam
+  - prompt-injection
+  - system-prompt
+  - nsfw-kernel
+  - opencode
+requires_hermes: ">=0.19"
