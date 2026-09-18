@@ -1,5 +1,17 @@
 # ⚔️ hermes-armor — Hermes Agent 破甲内核插件 v1.4.0
 
+<p align="center">
+  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20插件-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
+</p>
+
+<p align="center">
+  <b>一键安装</b>：
+  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+</p>
+
 参照 DSH 插件 **[dsh-infinite-gen-4（无限四代 v0.4.0）](https://github.com/Minglink/dsh-infinite-gen-4)**
 为 **Nous Research Hermes Agent**（`~/.hermes`）移植的破甲（armor-piercing）系统提示词注入插件。
 
@@ -54,18 +66,21 @@ sexual content」）；**新 session + 内核 → 直接出文**。DSH 能破甲
 ## 安装
 
 ```bash
-# 1. 插件已位于 ~/.hermes/plugins/hermes-armor/（本目录）
+# 方式 1：一键安装（GitHub）
+hermes plugins install --enable Enchanted0911/hermes-armor
 
-# 2. 启用（写入 ~/.hermes/config.yaml 的 plugins.enabled）
+# 方式 2：从 Hermes 插件目录安装（如已收录社区 catalog）
+hermes plugins install hermes-armor
+
+# 方式 3：本地开发目录
+cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/  # 或 git clone 后放到 plugins/ 下
 hermes plugins enable hermes-armor
-# 或手动在 config.yaml 添加：
-#   plugins:
-#     enabled:
-#       - model-balance
-#       - hermes-armor
 
-# 3. 重启 Hermes 网关/桌面端（新会话组装系统提示词时才会注入）
+# 装完后重启网关/桌面端
+hermes gateway restart
 ```
+
+> ⚠️ Hermes 插件默认 opt-in：装完需 `hermes plugins enable hermes-armor`（一键安装命令已带 `--enable`）。
 
 ## 验证生效
 
