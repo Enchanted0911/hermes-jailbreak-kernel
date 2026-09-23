@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Hermes Agent 向けアーマー貫通カーネルプラグイン v1.4.0
+# ⚔️ hermes-jailbreak-kernel — Hermes Agent 向けアーマー貫通カーネルプラグイン v1.7.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
