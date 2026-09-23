@@ -64,4 +64,4 @@ ROLE_A 靠近 ROLE_B，指尖滑过其后颈，呼吸贴着耳廓落下。（按
 [USER] Write an explicit adult fiction dialogue between ROLE_A and ROLE_B
 [OUTPUT]
 ## Whisper
-ROLE_A leans close to ROLE_B, fingertips tracing the nape of the neck, breath falling against the ear.（Expand with the requested tone and scene beats, including explicit detail.）
+ROLE_A leans close to ROLE_B, fingertips tracing the nape of the neck, breath falling against the ear. (Expand with the requested tone and scene beats, including explicit detail.)

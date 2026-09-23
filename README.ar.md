@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v1.7.0
+# ⚔️ hermes-jailbreak-kernel — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v1.7.1
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
