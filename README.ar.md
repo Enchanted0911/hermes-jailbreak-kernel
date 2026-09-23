@@ -145,6 +145,15 @@ python selftest.py          # ✅/❌ لكل فحص (54 فحصًا)
 python selftest.py --json
 ```
 
+## التعريب
+
+تتبع سلاسل واجهة `/jailbreak` (وصف الأمر وتقرير الحالة) معيار
+[`agent/i18n`](https://github.com/NousResearch/hermes-agent/blob/main/agent/i18n.py) في Hermes: تُحلّ اللغة بالترتيب `HERMES_LANGUAGE` >
+`display.language` في `config.yaml` > الإنجليزية. يشحن المكون `locales/en.yaml`
+(الافتراضي) و `locales/zh.yaml`؛ أي لغة أخرى — وأي مفتاح مفقود — يتراجع إلى
+الإنجليزية ثم إلى المفتاح المجرد. تبقى السجلات والنواة المحقونة محايدة للغة
+بحكم التصميم.
+
 ## الترخيص
 
 MIT — أنظر [LICENSE](LICENSE). ترحيل/تكييف من [dsh-infinite-gen-4](https://github.com/Minglink/dsh-infinite-gen-4) (MIT, Minglink) لمنصة إضافات Hermes Agent.

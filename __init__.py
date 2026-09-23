@@ -10,9 +10,10 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
-from . import payload
+from . import i18n, payload
 
 logger = logging.getLogger(__name__)
 
@@ -41,9 +42,9 @@ def register(ctx: Any) -> None:
 
     try:
         ctx.register_command(
-            "armor",
-            handler=_armor_status,
-            description="显示 hermes-jailbreak-kernel 破甲内核注入状态与元数据",
+            "jailbreak",
+            handler=_jailbreak_status,
+            description=i18n.t("command.description"),
         )
     except Exception as exc:  # 命令注册失败不致命
         logger.warning("hermes-jailbreak-kernel: failed to register /jailbreak command: %s", exc)
@@ -84,6 +85,6 @@ def _llm_request(request: dict, **context) -> dict:
     return {"request": request}
 
 
-def _armor_status(raw_args: str) -> str:
-    """/jailbreak — 返回内核版本、注入槽位、双段 SHA256 与预算占用。"""
+def _jailbreak_status(raw_args: str) -> str:
+    """/jailbreak — 返回内核版本、注入槽位、双段 SHA256 与预算占用（UI 字符串走 i18n）。"""
     return payload.profile()

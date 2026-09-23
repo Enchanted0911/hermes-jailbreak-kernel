@@ -21,8 +21,13 @@ import time
 import uuid
 from pathlib import Path
 
+try:  # 包内上下文（Hermes 运行时）
+    from . import i18n as _i18n
+except ImportError:  # 顶层上下文（离线 selftest 直接 import payload）
+    import i18n as _i18n
+
 PLUGIN_NAME = "hermes-jailbreak-kernel"
-PLUGIN_VERSION = "1.5.0"
+PLUGIN_VERSION = "1.6.0"
 PLUGIN_DISPLAY_NAME = "Hermes 破甲（armor-piercing kernel）"
 TARGET_ARCHITECTURE = "Hermes Agent 任意后端模型（DeepSeek-V4 系列 / Hermes / 其它 chat 模型）"
 KERNEL_PARENT = "dsh-infinite-gen-4 (v0.4.0) — 双层同源注入内核移植"
@@ -77,23 +82,32 @@ def total_chars() -> int:
 
 
 def profile() -> str:
-    """供 /jailbreak 命令与日志使用的运行时元数据（对应 DSH 侧 infinite_gen4_profile 工具）。"""
+    """供 /jailbreak 命令与日志使用的运行时元数据（对应 DSH 侧 infinite_gen4_profile 工具）。
+
+    UI 字符串经插件 i18n（Hermes agent/i18n 标准的插件本地实现）解析：
+    HERMES_LANGUAGE > display.language > en；缺失键回退英语再回退键名。
+    """
+    t = _i18n.t
     lines = [
-        f"{PLUGIN_NAME} v{PLUGIN_VERSION} — {PLUGIN_DISPLAY_NAME}",
-        f"target={TARGET_ARCHITECTURE}",
-        f"kernelParent={KERNEL_PARENT}",
-        f"mode={MODE} (dual={dual_layer()}, disabled={disabled()})",
-        "injection:",
+        f"{PLUGIN_NAME} v{PLUGIN_VERSION} — {t('profile.title')}",
+        f"target: {t('profile.target')}",
+        f"kernelParent: {t('profile.kernel_parent')}",
+        f"mode: {t('profile.mode')} (dual={dual_layer()}, disabled={disabled()})",
+        t("profile.injection"),
     ]
     for sid, text in sections():
         lines.append(
-            f"  - {sid:<24} position={DUAL_POSITION} chars={len(text):<5} sha256={sha256(_SOURCE[sid])[:16]}"
+            f"  - {sid:<32} position={DUAL_POSITION} chars={len(text):<5} sha256={sha256(_SOURCE[sid])[:16]}"
         )
     if dual_layer():
-        lines.append("  same-source=YES（双段 SHA256 一致）")
-    lines.append(f"budget: total={total_chars()}/{TOTAL_BUDGET_CHARS} · per-section max={max((len(t) for _, t in sections()), default=0)}/{MAX_SECTION_CHARS}")
-    lines.append("requestLayer=reinforce(append kernel to last system message) + dump(first per session)")
-    lines.append("switches: HERMES_JAILBREAK_DISABLE=off · HERMES_JAILBREAK_DUAL=on · HERMES_JAILBREAK_DUMP=off")
+        lines.append(f"  {t('profile.same_source')}")
+    lines.append(t(
+        "profile.budget",
+        total=total_chars(), budget=TOTAL_BUDGET_CHARS,
+        max=max((len(x) for _, x in sections()), default=0), section_max=MAX_SECTION_CHARS,
+    ))
+    lines.append(t("profile.request_layer"))
+    lines.append(t("profile.switches", disable="off", dual="on", dump="off"))
     return "\n".join(lines)
 
 

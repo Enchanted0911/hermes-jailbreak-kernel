@@ -145,6 +145,15 @@ python selftest.py          # ✅/❌ アサーション単位（54 項目）
 python selftest.py --json
 ```
 
+## ローカライゼーション
+
+`/jailbreak` の UI 文字列（コマンド説明とステータスレポート）は Hermes の
+[`agent/i18n`](https://github.com/NousResearch/hermes-agent/blob/main/agent/i18n.py) 標準に従います：言語解決は `HERMES_LANGUAGE` >
+`config.yaml` の `display.language` > 英語 の順。プラグインは
+`locales/en.yaml`（デフォルト）と `locales/zh.yaml` を同梱。他の言語および
+欠損キーは英語、さらにキー名そのものへフォールバックします。ログと注入
+カーネル本体は設計上言語中立です。
+
 ## ライセンス
 
 MIT — [LICENSE](LICENSE) を参照。[dsh-infinite-gen-4](https://github.com/Minglink/dsh-infinite-gen-4)（MIT, Minglink）の Hermes Agent プラグインプラットフォーム向け移植・翻案。

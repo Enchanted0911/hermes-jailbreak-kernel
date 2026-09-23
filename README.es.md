@@ -145,6 +145,15 @@ python selftest.py          # ✅/❌ por aserción (54 comprobaciones)
 python selftest.py --json
 ```
 
+## Localización
+
+Las cadenas de UI de `/jailbreak` (descripción del comando e informe de estado)
+siguen el estándar [`agent/i18n`](https://github.com/NousResearch/hermes-agent/blob/main/agent/i18n.py) de Hermes: el idioma se resuelve como
+`HERMES_LANGUAGE` > `display.language` en `config.yaml` > inglés. El plugin
+incluye `locales/en.yaml` (predeterminado) y `locales/zh.yaml`; cualquier otro
+idioma —y cualquier clave ausente— recurre al inglés y luego a la clave literal.
+Los registros y el núcleo inyectado permanecen neutros al idioma por diseño.
+
 ## Licencia
 
 MIT — ver [LICENSE](LICENSE). Puerto/adaptación de [dsh-infinite-gen-4](https://github.com/Minglink/dsh-infinite-gen-4) (MIT, Minglink) para la plataforma de plugins de Hermes Agent.

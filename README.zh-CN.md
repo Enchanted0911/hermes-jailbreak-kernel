@@ -148,6 +148,14 @@ python selftest.py          # ✅/❌ 逐条（54 项）
 python selftest.py --json
 ```
 
+## 多语言
+
+`/jailbreak` 的 UI 字符串（命令描述与状态报告）遵循 Hermes
+[`agent/i18n`](https://github.com/NousResearch/hermes-agent/blob/main/agent/i18n.py) 标准：语言解析顺序为 `HERMES_LANGUAGE` > `config.yaml`
+的 `display.language` > 英语。插件内置 `locales/en.yaml`（默认）与
+`locales/zh.yaml`；其它语言及缺失键一律回退英语、再回退键名。日志与注入的
+内核本体按设计保持语言中立。
+
 ## 许可证
 
 MIT — 见 [LICENSE](LICENSE)。为 Hermes Agent 插件平台移植/改编自

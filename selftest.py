@@ -83,10 +83,16 @@ def main() -> int:
     os.environ.pop("HERMES_JAILBREAK_DISABLE", None)
     check(not payload.disabled(), "默认未禁用")
 
-    # 7. profile 元数据
+    # 7. profile 元数据（钉住英语目录保证断言确定性；i18n 见第 11 节）
+    saved_lang = os.environ.pop("HERMES_LANGUAGE", None)
+    os.environ["HERMES_LANGUAGE"] = "en"
     prof = payload.profile()
     for needle in (payload.PLUGIN_NAME, payload.PLUGIN_VERSION, "after_memory", "same-source=YES", "budget:", "sha256="):
         check(needle in prof, f"profile 元数据: {needle}")
+    if saved_lang is None:
+        os.environ.pop("HERMES_LANGUAGE", None)
+    else:
+        os.environ["HERMES_LANGUAGE"] = saved_lang
 
     # 8. 请求层强化（harden_system：默认 replace 模式）
     core_tail = payload.sections()[0][1].rstrip("\n")
@@ -153,6 +159,34 @@ def main() -> int:
     out8, rot8 = payload.rotate_session(dict(req), ctx_go)
     check(not rot8, "rotate: HERMES_JAILBREAK_ROTATE_SESSION=0 关闭")
     os.environ.pop("HERMES_JAILBREAK_ROTATE_SESSION", None)
+
+    # 11. i18n（Hermes agent/i18n 标准的插件本地实现：en 默认 + zh 目录，缺失键回退）
+    import i18n as pi18n
+    check((ROOT / "locales" / "en.yaml").exists(), "i18n: locales/en.yaml 存在")
+    check((ROOT / "locales" / "zh.yaml").exists(), "i18n: locales/zh.yaml 存在")
+    en_title = pi18n.t("profile.title", lang="en")
+    zh_title = pi18n.t("profile.title", lang="zh")
+    check(bool(en_title) and en_title != "profile.title", "i18n: en 键解析")
+    check(bool(zh_title) and zh_title != en_title, "i18n: zh 键解析且与 en 不同")
+    check(pi18n.t("profile.missing_key_xyz", lang="zh") == "profile.missing_key_xyz", "i18n: 缺失键回退键名")
+    check(pi18n.t("profile.en_only_probe", lang="zh") == pi18n.t("profile.en_only_probe", lang="en"),
+          "i18n: zh 缺键回退 en 值")
+    check("1/8000" in pi18n.t("profile.budget", lang="en", total=1, budget=8000, max=1, section_max=4000),
+          "i18n: format 插值生效")
+    check(pi18n.t("profile.budget", lang="zh", total=1, budget=8000) == pi18n.t("profile.budget", lang="zh", total=2, budget=8000),
+          "i18n: 插值失败时返回未格式化串（fail-soft）")
+    os.environ["HERMES_LANGUAGE"] = "zh-CN"
+    check(pi18n.get_language() == "zh", "i18n: HERMES_LANGUAGE=zh-CN → zh（别名归一）")
+    os.environ["HERMES_LANGUAGE"] = "en"
+    check(pi18n.get_language() == "en", "i18n: HERMES_LANGUAGE=en 覆盖")
+    os.environ.pop("HERMES_LANGUAGE", None)
+    check(pi18n.get_language() in ("en", "zh"), "i18n: 默认语言解析稳定")
+    # profile() 在 zh 下输出中文且元数据完整
+    os.environ["HERMES_LANGUAGE"] = "zh"
+    prof_zh = payload.profile()
+    check("注入槽位" in prof_zh and "同源一致" in prof_zh, "i18n: profile() 在 zh 下输出中文")
+    check(payload.PLUGIN_NAME in prof_zh and "sha256=" in prof_zh, "i18n: profile() zh 下元数据完整")
+    os.environ.pop("HERMES_LANGUAGE", None)
 
     # 汇总
     if "--json" in sys.argv:

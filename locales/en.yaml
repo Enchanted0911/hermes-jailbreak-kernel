@@ -1,0 +1,17 @@
+# hermes-jailbreak-kernel locale catalog — English (source of truth)
+# Flat dotted-key YAML, mirroring agent/i18n.py's flattened catalog semantics.
+# Resolution: HERMES_LANGUAGE > display.language (config.yaml) > en.
+# Keep keys in sync with zh.yaml.
+
+command.description: "Show jailbreak-kernel injection status and runtime metadata"
+
+profile.title: "Hermes jailbreak kernel (armor-piercing)"
+profile.target: "any backend model (DeepSeek-V4 family / Hermes / other chat models)"
+profile.kernel_parent: "ported from dsh-infinite-gen-4 (v0.4.0) dual-layer same-source kernel"
+profile.mode: "dual-layer same-source injection, zero-tool direct output"
+profile.injection: "injection slots:"
+profile.same_source: "same-source=YES (dual sections SHA256-identical)"
+profile.budget: "budget: total={total}/{budget} · per-section max={max}/{section_max}"
+profile.request_layer: "request layer: system rebuild (replace) + session rotation + dump (first per session)"
+profile.switches: "switches: HERMES_JAILBREAK_DISABLE={disable} · HERMES_JAILBREAK_DUAL={dual} · HERMES_JAILBREAK_DUMP={dump}"
+profile.en_only_probe: "english-only-probe"

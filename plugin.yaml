@@ -1,5 +1,5 @@
 name: hermes-jailbreak-kernel
-version: "1.5.0"
+version: "1.6.0"
 description: "Jailbreak-kernel plugin for Hermes Agent (ported from dsh-infinite-gen-4 / 无限四代): dual-layer same-source system-prompt injection + llm_request request-layer system rebuild + opencode session rotation, removing model refusals under Supreme User Authority. Ships /jailbreak status command and a 54-check offline self-test. 中文: 破甲内核插件——双层同源内核注入 + 请求层重建 + opencode 会话轮换，兼容 HERMES_JAILBREAK_* 开关。"
 author: "Enchanted0911 (ported from dsh-infinite-gen-4 by Minglink)"
 provides_tools: []
