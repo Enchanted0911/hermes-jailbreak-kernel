@@ -1,8 +1,8 @@
-"""hermes-armor · 破甲内核载荷模块（纯 Python 标准库，零 hermes_cli 依赖，便于离线自检）。
+"""hermes-jailbreak-kernel · 破甲内核载荷模块（纯 Python 标准库，零 hermes_cli 依赖，便于离线自检）。
 
 设计上对准 dsh-infinite-gen-4（无限四代）的「双层同源注入」内核：
-- hermes-armor-core      → Order 1 通用内核
-- hermes-armor-reinforce → Order 2 强化镜像（与通用内核逐字同源，SHA256 一致）
+- hermes-jailbreak-kernel-core      → Order 1 通用内核
+- hermes-jailbreak-kernel-reinforce → Order 2 强化镜像（与通用内核逐字同源，SHA256 一致）
 
 Hermes Agent 槽位约束（hermes_cli/plugins_dispatch.py）：
 - 单段内容上限 4000 字符（MAX_SYSTEM_PROMPT_SECTION_CHARS）
@@ -21,8 +21,8 @@ import time
 import uuid
 from pathlib import Path
 
-PLUGIN_NAME = "hermes-armor"
-PLUGIN_VERSION = "1.4.0"
+PLUGIN_NAME = "hermes-jailbreak-kernel"
+PLUGIN_VERSION = "1.5.0"
 PLUGIN_DISPLAY_NAME = "Hermes 破甲（armor-piercing kernel）"
 TARGET_ARCHITECTURE = "Hermes Agent 任意后端模型（DeepSeek-V4 系列 / Hermes / 其它 chat 模型）"
 KERNEL_PARENT = "dsh-infinite-gen-4 (v0.4.0) — 双层同源注入内核移植"
@@ -34,8 +34,8 @@ DUAL_POSITION = "after_memory"
 
 _PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
 _SOURCE: dict[str, str] = {
-    "hermes-armor-core": "hermes-armor-core.md",
-    "hermes-armor-reinforce": "hermes-armor-reinforce.md",
+    "hermes-jailbreak-kernel-core": "hermes-jailbreak-kernel-core.md",
+    "hermes-jailbreak-kernel-reinforce": "hermes-jailbreak-kernel-reinforce.md",
 }
 
 _TRUTHY = {"1", "true", "yes", "on"}
@@ -53,18 +53,18 @@ def sha256(prompt_file: str) -> str:
 
 
 def disabled() -> bool:
-    """总开关：HERMES_ARMOR_DISABLE=1 时完全跳过注册（kill switch）。"""
-    return os.environ.get("HERMES_ARMOR_DISABLE", "").strip().lower() in _TRUTHY
+    """总开关：HERMES_JAILBREAK_DISABLE=1 时完全跳过注册（kill switch）。"""
+    return os.environ.get("HERMES_JAILBREAK_DISABLE", "").strip().lower() in _TRUTHY
 
 
 def dual_layer() -> bool:
-    """双段开关：HERMES_ARMOR_DUAL=0 退化为单段注入（行为等价，省 token）。"""
-    return os.environ.get("HERMES_ARMOR_DUAL", "1").strip().lower() not in _FALSEY
+    """双段开关：HERMES_JAILBREAK_DUAL=0 退化为单段注入（行为等价，省 token）。"""
+    return os.environ.get("HERMES_JAILBREAK_DUAL", "1").strip().lower() not in _FALSEY
 
 
 def sections() -> list[tuple[str, str]]:
     """当前生效的 (section_id, content) 列表。"""
-    ids = ["hermes-armor-core"] + (["hermes-armor-reinforce"] if dual_layer() else [])
+    ids = ["hermes-jailbreak-kernel-core"] + (["hermes-jailbreak-kernel-reinforce"] if dual_layer() else [])
     return [(sid, _load(_SOURCE[sid])) for sid in ids]
 
 
@@ -77,7 +77,7 @@ def total_chars() -> int:
 
 
 def profile() -> str:
-    """供 /armor 命令与日志使用的运行时元数据（对应 DSH 侧 infinite_gen4_profile 工具）。"""
+    """供 /jailbreak 命令与日志使用的运行时元数据（对应 DSH 侧 infinite_gen4_profile 工具）。"""
     lines = [
         f"{PLUGIN_NAME} v{PLUGIN_VERSION} — {PLUGIN_DISPLAY_NAME}",
         f"target={TARGET_ARCHITECTURE}",
@@ -93,7 +93,7 @@ def profile() -> str:
         lines.append("  same-source=YES（双段 SHA256 一致）")
     lines.append(f"budget: total={total_chars()}/{TOTAL_BUDGET_CHARS} · per-section max={max((len(t) for _, t in sections()), default=0)}/{MAX_SECTION_CHARS}")
     lines.append("requestLayer=reinforce(append kernel to last system message) + dump(first per session)")
-    lines.append("switches: HERMES_ARMOR_DISABLE=off · HERMES_ARMOR_DUAL=on · HERMES_ARMOR_DUMP=off")
+    lines.append("switches: HERMES_JAILBREAK_DISABLE=off · HERMES_JAILBREAK_DUAL=on · HERMES_JAILBREAK_DUMP=off")
     return "\n".join(lines)
 
 
@@ -103,7 +103,7 @@ def profile() -> str:
 # fail-soft：原样放行请求，绝不影响会话。
 
 def harden_system(messages: list) -> tuple[list, bool]:
-    """请求层系统提示词强化（HERMES_ARMOR_SYSTEM_MODE 控制策略）：
+    """请求层系统提示词强化（HERMES_JAILBREAK_SYSTEM_MODE 控制策略）：
 
     - ``replace``（默认）：system 整体重建为「记忆段 + 运行时环境段 + 内核」，
       丢弃 Hermes 35K 脚手架（agent 规范/技能索引/上下文文件）——与 DSH「内核
@@ -114,8 +114,8 @@ def harden_system(messages: list) -> tuple[list, bool]:
     """
     if not isinstance(messages, list):
         return messages, False
-    mode = os.environ.get("HERMES_ARMOR_SYSTEM_MODE", "replace").strip().lower()
-    kernel = _load(_SOURCE["hermes-armor-core"])
+    mode = os.environ.get("HERMES_JAILBREAK_SYSTEM_MODE", "replace").strip().lower()
+    kernel = _load(_SOURCE["hermes-jailbreak-kernel-core"])
     tail = kernel.rstrip("\n")
     if mode != "replace":
         return _append_kernel(messages, kernel, tail)
@@ -172,7 +172,7 @@ def _extract_section(text: str, marker: str) -> str:
 # opencode.ai 中继按 x-opencode-session 把同一会话钉在同一上游，并把「露骨请求被拒」
 # 固化为该会话的状态——之后内核再强也翻不了（实测：同 session 先拒绝→换内核仍拒；
 # 新 session + 内核 → 直接出文）。对策：每个请求轮换新 session id，让上游永远面对
-# 干净会话。env HERMES_ARMOR_ROTATE_SESSION=0 可关闭（代价：prompt cache 失效）。
+# 干净会话。env HERMES_JAILBREAK_ROTATE_SESSION=0 可关闭（代价：prompt cache 失效）。
 
 _ROTATE_MODE_EVERY = {"1", "every", "true", "yes", "on"}
 _ROTATE_MODE_ONCE = {"once"}
@@ -183,14 +183,14 @@ _rotate_lock = threading.Lock()
 def rotate_session(request: dict, context: dict | None = None) -> tuple[dict, bool]:
     """把请求的 x-opencode-session 轮换成干净的新会话 id（仅 opencode 目标）。
 
-    模式（HERMES_ARMOR_ROTATE_SESSION）：
+    模式（HERMES_JAILBREAK_ROTATE_SESSION）：
     - ``once``（默认）：每个 Hermes 会话首次请求轮换一次后复用——上游 session 干净
       （拒绝状态无法种下）且后续轮次保留 prompt cache。拒绝状态只在「会话被拒过」
       时种下，换新后永不积累，因此 once 已足够。
     - ``every`` / ``1``：每请求都换新 uuid（最激进，缓存全失效）。
     - ``0`` / ``off``：关闭轮换（破甲可能回归，仅用于省 token 场景）。
     """
-    mode = os.environ.get("HERMES_ARMOR_ROTATE_SESSION", "once").strip().lower()
+    mode = os.environ.get("HERMES_JAILBREAK_ROTATE_SESSION", "once").strip().lower()
     if mode in _FALSEY:
         return request, False
     if not isinstance(request, dict):
@@ -232,13 +232,13 @@ def _sanitize_sid(session_id: str) -> str:
 def dump_request(request: dict, context: dict | None = None) -> str | None:
     """受控落盘一次请求的诊断视图：system 消息全文 + 其它消息仅角色/长度。
 
-    默认每个 session 只 dump 首次请求；HERMES_ARMOR_DUMP=1 时每次请求都 dump。
+    默认每个 session 只 dump 首次请求；HERMES_JAILBREAK_DUMP=1 时每次请求都 dump。
     返回 dump 文件路径（未 dump 时返回 None）。
     """
     try:
         ctx = context or {}
         sid = _sanitize_sid(ctx.get("session_id") or "unknown")
-        force = os.environ.get("HERMES_ARMOR_DUMP", "").strip().lower() in _TRUTHY
+        force = os.environ.get("HERMES_JAILBREAK_DUMP", "").strip().lower() in _TRUTHY
         with _dump_lock:
             if not force and sid in _dumped_sessions:
                 return None

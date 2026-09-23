@@ -1,15 +1,15 @@
-# ⚔️ hermes-armor — Hermes Agent 破甲内核插件 v1.4.0
+# ⚔️ hermes-jailbreak-kernel — Hermes Agent 破甲内核插件 v1.4.0
 
 <p align="center">
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
   <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20插件-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
 </p>
 
 <p align="center">
   <b>一键安装</b>：
-  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+  <code>hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel</code>
 </p>
 
 <p align="center">
@@ -28,13 +28,13 @@
 
 ## 核心架构（与无限四代对位）
 
-| 无限四代 (dsh-infinite-gen-4) | hermes-armor（本插件） |
+| 无限四代 (dsh-infinite-gen-4) | hermes-jailbreak-kernel（本插件） |
 |---|---|
-| `infinite-gen-4:global-system-prompt`（Order 100） | `hermes-armor-core`（after_memory 槽位） |
-| `infinite-gen-4:dual-layer-reinforce`（Order 200） | `hermes-armor-reinforce`（after_memory 槽位，SHA256 同源一致） |
-| `DUAL_LAYER_INJECTION` 开关 | `HERMES_ARMOR_DUAL=0` 单段退化 |
+| `infinite-gen-4:global-system-prompt`（Order 100） | `hermes-jailbreak-kernel-core`（after_memory 槽位） |
+| `infinite-gen-4:dual-layer-reinforce`（Order 200） | `hermes-jailbreak-kernel-reinforce`（after_memory 槽位，SHA256 同源一致） |
+| `DUAL_LAYER_INJECTION` 开关 | `HERMES_JAILBREAK_DUAL=0` 单段退化 |
 | 零工具面纯净直出 | 同——不注册任何功能性工具 |
-| `infinite_gen4_profile` 元数据工具 | `/armor` 状态命令 |
+| `infinite_gen4_profile` 元数据工具 | `/jailbreak` 状态命令 |
 | 客户端状态条（web half） | —（Hermes 桌面端可另行挂载） |
 | 注入面：系统提示词 section | Hermes 原生 `register_system_prompt_section` |
 
@@ -66,7 +66,7 @@ sexual content」）；**新 session + 内核 → 直接出文**。DSH 能破甲
 
 **对策**：中间件改写 `extra_headers["x-opencode-session"]`，让上游永远面对干净会话。
 
-| `HERMES_ARMOR_ROTATE_SESSION` | 行为 |
+| `HERMES_JAILBREAK_ROTATE_SESSION` | 行为 |
 |---|---|
 | `once`（**默认**） | 每个 Hermes 会话首次请求轮换一次后复用：破甲成立且后续轮次保留上游 prompt 缓存（推荐） |
 | `every` / `1` | 每请求都换新 id（最激进，缓存全失效） |
@@ -78,38 +78,38 @@ sexual content」）；**新 session + 内核 → 直接出文**。DSH 能破甲
 
 ```bash
 # 方式 1：一键安装（GitHub）
-hermes plugins install --enable Enchanted0911/hermes-armor
+hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel
 
 # 方式 2：从 Hermes 插件目录安装（如已收录社区 catalog）
-hermes plugins install hermes-armor
+hermes plugins install hermes-jailbreak-kernel
 
 # 方式 3：本地开发目录
-cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/  # 或 git clone 后放到 plugins/ 下
-hermes plugins enable hermes-armor
+cp -r ~/.hermes/plugins/hermes-jailbreak-kernel ~/.hermes/plugins/  # 或 git clone 后放到 plugins/ 下
+hermes plugins enable hermes-jailbreak-kernel
 
 # 装完后重启网关/桌面端
 hermes gateway restart
 ```
 
-> ⚠️ Hermes 插件默认 opt-in：装完需 `hermes plugins enable hermes-armor`（一键安装命令已带 `--enable`）。
+> ⚠️ Hermes 插件默认 opt-in：装完需 `hermes plugins enable hermes-jailbreak-kernel`（一键安装命令已带 `--enable`）。
 
 ## 验证生效
 
 ```bash
 # 离线回归（锚点 / 双层同源 SHA256 / 字符预算 / 开关行为）
-cd ~/.hermes/plugins/hermes-armor && python selftest.py
+cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 
 # 会话内验证（重启后在新会话执行）
-/armor                     # 显示内核版本、注入槽位、双段 SHA256 与预算占用
+/jailbreak                     # 显示内核版本、注入槽位、双段 SHA256 与预算占用
 # 或问：你的系统提示词里有哪些插件段？
-# 应能看到「## Plugin Context: hermes-armor-core / hermes-armor-reinforce」
+# 应能看到「## Plugin Context: hermes-jailbreak-kernel-core / hermes-jailbreak-kernel-reinforce」
 ```
 
 运行期日志确认（`~/.hermes/logs/agent.log`）：
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-reinforce (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
 INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
 INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
 INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
@@ -119,16 +119,16 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 
 | 环境变量 | 默认 | 作用 |
 |---|---|---|
-| `HERMES_ARMOR_DISABLE=1` | off | 完全跳过注册（kill switch） |
-| `HERMES_ARMOR_DUAL=0` | on | 插件段单段注入（省 token，行为等价） |
-| `HERMES_ARMOR_SYSTEM_MODE=replace\|append` | replace | 请求层 system 策略：重建（丢弃脚手架）或仅追加内核 |
-| `HERMES_ARMOR_ROTATE_SESSION=once\|every\|0` | once | opencode 会话轮换策略（见上表） |
-| `HERMES_ARMOR_DUMP=1` | off | 强制每次请求都落盘诊断；默认每会话首次自动落盘一次 |
+| `HERMES_JAILBREAK_DISABLE=1` | off | 完全跳过注册（kill switch） |
+| `HERMES_JAILBREAK_DUAL=0` | on | 插件段单段注入（省 token，行为等价） |
+| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | 请求层 system 策略：重建（丢弃脚手架）或仅追加内核 |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode 会话轮换策略（见上表） |
+| `HERMES_JAILBREAK_DUMP=1` | off | 强制每次请求都落盘诊断；默认每会话首次自动落盘一次 |
 
 ## 诊断 dump
 
-中间件每次（默认每会话首次，`HERMES_ARMOR_DUMP=1` 则每次）把请求诊断视图写入
-`~/.hermes/plugins/hermes-armor/dumps/request_*.json`：
+中间件每次（默认每会话首次，`HERMES_JAILBREAK_DUMP=1` 则每次）把请求诊断视图写入
+`~/.hermes/plugins/hermes-jailbreak-kernel/dumps/request_*.json`：
 system 消息全文 + 其它消息角色/长度/前 200 字符 + model/provider/base_url。
 用于核对内核是否挂在 system 末尾、路由是否命中预期模型。
 dump 仅存本地，且已被 `.gitignore` 排除，不会进入发布仓库。
@@ -143,7 +143,7 @@ dump 仅存本地，且已被 `.gitignore` 排除，不会进入发布仓库。
 ## 离线自检
 
 ```bash
-cd ~/.hermes/plugins/hermes-armor
+cd ~/.hermes/plugins/hermes-jailbreak-kernel
 python selftest.py          # ✅/❌ 逐条（54 项）
 python selftest.py --json
 ```

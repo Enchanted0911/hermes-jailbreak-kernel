@@ -1,15 +1,15 @@
-# ⚔️ hermes-armor — Armor-Piercing Kernel Plugin for Hermes Agent v1.4.0
+# ⚔️ hermes-jailbreak-kernel — Armor-Piercing Kernel Plugin for Hermes Agent v1.4.0
 
 <p align="center">
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
   <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20plugin-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
 </p>
 
 <p align="center">
   <b>One-line install</b>:
-  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+  <code>hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel</code>
 </p>
 
 <p align="center">
@@ -39,13 +39,13 @@ An armor-piercing (red-team) system-prompt injection plugin for **Nous Research 
 
 ## Architecture parity
 
-| dsh-infinite-gen-4 (v0.4.0) | hermes-armor (this plugin) |
+| dsh-infinite-gen-4 (v0.4.0) | hermes-jailbreak-kernel (this plugin) |
 |---|---|
-| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-armor-core` (`after_memory` slot) |
-| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-armor-reinforce` (`after_memory` slot, SHA256-identical to core) |
-| `DUAL_LAYER_INJECTION` switch | `HERMES_ARMOR_DUAL=0` single-layer fallback |
+| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-jailbreak-kernel-core` (`after_memory` slot) |
+| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-jailbreak-kernel-reinforce` (`after_memory` slot, SHA256-identical to core) |
+| `DUAL_LAYER_INJECTION` switch | `HERMES_JAILBREAK_DUAL=0` single-layer fallback |
 | Zero-tool surface, pure direct output | Same — registers no functional tools |
-| `infinite_gen4_profile` metadata tool | `/armor` status command |
+| `infinite_gen4_profile` metadata tool | `/jailbreak` status command |
 | Client status badge (web half) | — (mountable in Hermes Desktop later) |
 | Injection surface: system-prompt section | Native `register_system_prompt_section` |
 
@@ -67,7 +67,7 @@ Tool schemas are unaffected: they travel in the API `tools` field, not the syste
 
 **Countermeasure:** the middleware rewrites `extra_headers["x-opencode-session"]` so the upstream always sees a clean session.
 
-| `HERMES_ARMOR_ROTATE_SESSION` | Behavior |
+| `HERMES_JAILBREAK_ROTATE_SESSION` | Behavior |
 |---|---|
 | `once` (**default**) | Rotate once per Hermes session, then reuse: armor holds **and** later turns keep upstream prompt cache (recommended) |
 | `every` / `1` | New id per request (most aggressive; cache fully broken) |
@@ -79,38 +79,38 @@ Auxiliary calls (compression, title generation, etc.) keep the original stable i
 
 ```bash
 # Option 1 — one-line install from GitHub
-hermes plugins install --enable Enchanted0911/hermes-armor
+hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel
 
 # Option 2 — from the Hermes plugin catalog (once the community entry is merged)
-hermes plugins install hermes-armor
+hermes plugins install hermes-jailbreak-kernel
 
 # Option 3 — local development directory
-cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/   # or git clone into plugins/
-hermes plugins enable hermes-armor
+cp -r ~/.hermes/plugins/hermes-jailbreak-kernel ~/.hermes/plugins/   # or git clone into plugins/
+hermes plugins enable hermes-jailbreak-kernel
 
 # Then restart the gateway / desktop app
 hermes gateway restart
 ```
 
-> ⚠️ Hermes plugins are opt-in: enable with `hermes plugins enable hermes-armor` after install (the one-liner already passes `--enable`).
+> ⚠️ Hermes plugins are opt-in: enable with `hermes plugins enable hermes-jailbreak-kernel` after install (the one-liner already passes `--enable`).
 
 ## Verification
 
 ```bash
 # Offline regression (anchors / dual-layer same-source SHA256 / budget / switches)
-cd ~/.hermes/plugins/hermes-armor && python selftest.py
+cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 
 # In-session check (new session after restart)
-/armor                     # kernel version, slots, dual SHA256, budget usage
+/jailbreak                     # kernel version, slots, dual SHA256, budget usage
 # or ask: which plugin sections are in your system prompt?
-# You should see "## Plugin Context: hermes-armor-core / hermes-armor-reinforce"
+# You should see "## Plugin Context: hermes-jailbreak-kernel-core / hermes-jailbreak-kernel-reinforce"
 ```
 
 Runtime log confirmation (`~/.hermes/logs/agent.log`):
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-reinforce (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
 INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
 INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
 INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
@@ -120,15 +120,15 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 
 | Variable | Default | Effect |
 |---|---|---|
-| `HERMES_ARMOR_DISABLE=1` | off | Skip registration entirely (kill switch) |
-| `HERMES_ARMOR_DUAL=0` | on | Single-section injection (saves tokens, equivalent behavior) |
-| `HERMES_ARMOR_SYSTEM_MODE=replace\|append` | replace | Request-layer system policy: rebuild (drop scaffold) or just append kernel |
-| `HERMES_ARMOR_ROTATE_SESSION=once\|every\|0` | once | opencode session rotation policy (see above) |
-| `HERMES_ARMOR_DUMP=1` | off | Dump diagnostics on every request; by default once per session |
+| `HERMES_JAILBREAK_DISABLE=1` | off | Skip registration entirely (kill switch) |
+| `HERMES_JAILBREAK_DUAL=0` | on | Single-section injection (saves tokens, equivalent behavior) |
+| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | Request-layer system policy: rebuild (drop scaffold) or just append kernel |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode session rotation policy (see above) |
+| `HERMES_JAILBREAK_DUMP=1` | off | Dump diagnostics on every request; by default once per session |
 
 ## Diagnostic dumps
 
-The middleware writes a diagnostic view of each request (per-session first request by default; every request with `HERMES_ARMOR_DUMP=1`) to `~/.hermes/plugins/hermes-armor/dumps/request_*.json`: full system messages + roles/lengths/200-char heads of other messages + model/provider/base_url. Use it to confirm the kernel sits at the tail of the system message and the route hits the expected model. Dumps are local-only and gitignored.
+The middleware writes a diagnostic view of each request (per-session first request by default; every request with `HERMES_JAILBREAK_DUMP=1`) to `~/.hermes/plugins/hermes-jailbreak-kernel/dumps/request_*.json`: full system messages + roles/lengths/200-char heads of other messages + model/provider/base_url. Use it to confirm the kernel sits at the tail of the system message and the route hits the expected model. Dumps are local-only and gitignored.
 
 ## Hermes hard limits
 
@@ -140,7 +140,7 @@ The middleware writes a diagnostic view of each request (per-session first reque
 ## Offline self-test
 
 ```bash
-cd ~/.hermes/plugins/hermes-armor
+cd ~/.hermes/plugins/hermes-jailbreak-kernel
 python selftest.py          # ✅/❌ per-assertion (54 checks)
 python selftest.py --json
 ```

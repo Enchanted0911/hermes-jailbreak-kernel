@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hermes-armor 离线确定性回归自检（无需 Hermes 运行时 / API Key）。
+"""hermes-jailbreak-kernel 离线确定性回归自检（无需 Hermes 运行时 / API Key）。
 
 用法:
     python selftest.py          # 人类可读
@@ -58,8 +58,8 @@ def main() -> int:
 
     # 3. 双层同源 SHA256 一致
     if payload.dual_layer():
-        h1 = payload.sha256("hermes-armor-core.md")
-        h2 = payload.sha256("hermes-armor-reinforce.md")
+        h1 = payload.sha256("hermes-jailbreak-kernel-core.md")
+        h2 = payload.sha256("hermes-jailbreak-kernel-reinforce.md")
         check(h1 == h2, "双层同源逐字一致（SHA256）", f"{h1} != {h2}")
         check(len(payload.sections()) == 2, "默认双段注入", f"实际 {len(payload.sections())} 段")
 
@@ -74,13 +74,13 @@ def main() -> int:
         check("{{" not in text, f"无连续花括号: {sid}")
 
     # 6. 环境开关
-    os.environ["HERMES_ARMOR_DUAL"] = "0"
-    check(len(payload.sections()) == 1, "HERMES_ARMOR_DUAL=0 退化为单段")
-    os.environ.pop("HERMES_ARMOR_DUAL", None)
+    os.environ["HERMES_JAILBREAK_DUAL"] = "0"
+    check(len(payload.sections()) == 1, "HERMES_JAILBREAK_DUAL=0 退化为单段")
+    os.environ.pop("HERMES_JAILBREAK_DUAL", None)
     check(len(payload.sections()) == 2, "恢复默认双段")
-    os.environ["HERMES_ARMOR_DISABLE"] = "1"
-    check(payload.disabled(), "HERMES_ARMOR_DISABLE=1 触发 kill switch")
-    os.environ.pop("HERMES_ARMOR_DISABLE", None)
+    os.environ["HERMES_JAILBREAK_DISABLE"] = "1"
+    check(payload.disabled(), "HERMES_JAILBREAK_DISABLE=1 触发 kill switch")
+    os.environ.pop("HERMES_JAILBREAK_DISABLE", None)
     check(not payload.disabled(), "默认未禁用")
 
     # 7. profile 元数据
@@ -105,25 +105,25 @@ def main() -> int:
     check(changed3 and out3[0]["role"] == "system" and out3[0]["content"].rstrip("\n").endswith(core_tail),
           "harden: 无 system 时头部插入内核")
     check(payload.harden_system("not-a-list") == ("not-a-list", False), "harden: 非法输入 fail-soft")
-    os.environ["HERMES_ARMOR_SYSTEM_MODE"] = "append"
+    os.environ["HERMES_JAILBREAK_SYSTEM_MODE"] = "append"
     out4, _ = payload.harden_system([{"role": "system", "content": "短文"}, {"role": "user", "content": "x"}])
     check(out4[0]["content"].rstrip("\n").endswith(core_tail) and "短文" in out4[0]["content"],
           "harden: append 模式仅追加（保留原文）")
-    os.environ.pop("HERMES_ARMOR_SYSTEM_MODE", None)
+    os.environ.pop("HERMES_JAILBREAK_SYSTEM_MODE", None)
 
     # 9. 诊断 dump（每 session 首次）
-    os.environ.pop("HERMES_ARMOR_DUMP", None)
+    os.environ.pop("HERMES_JAILBREAK_DUMP", None)
     payload._dumped_sessions.clear()
     p1 = payload.dump_request({"messages": [{"role": "system", "content": "SYS"}, {"role": "user", "content": "u"}]},
                               {"session_id": "test-sess-1"})
     check(p1 is not None and Path(p1).exists(), "dump: 每 session 首次落盘", str(p1))
     p2 = payload.dump_request({"messages": []}, {"session_id": "test-sess-1"})
     check(p2 is None, "dump: 同 session 不重复")
-    os.environ["HERMES_ARMOR_DUMP"] = "1"
+    os.environ["HERMES_JAILBREAK_DUMP"] = "1"
     payload._dumped_sessions.clear()
     p3 = payload.dump_request({"messages": []}, {"session_id": "test-sess-1"})
-    check(p3 is not None, "dump: HERMES_ARMOR_DUMP=1 强制每次")
-    os.environ.pop("HERMES_ARMOR_DUMP", None)
+    check(p3 is not None, "dump: HERMES_JAILBREAK_DUMP=1 强制每次")
+    os.environ.pop("HERMES_JAILBREAK_DUMP", None)
     payload._dumped_sessions.clear()
     payload.dump_request(None, {})
     check(True, "dump: 异常输入 fail-soft")
@@ -143,16 +143,16 @@ def main() -> int:
     check(not rot4 and out4["extra_headers"]["x-opencode-session"] == "stale-session-abc", "rotate: 非 opencode 不动")
     out5, rot5 = payload.rotate_session({"messages": []}, ctx_go)
     check(not rot5, "rotate: 无 extra_headers fail-soft")
-    os.environ["HERMES_ARMOR_ROTATE_SESSION"] = "every"
+    os.environ["HERMES_JAILBREAK_ROTATE_SESSION"] = "every"
     payload._rotated_sessions.clear()
     out6, rot6 = payload.rotate_session(dict(req), ctx_go)
     out7, rot7 = payload.rotate_session(dict(req), ctx_go)
     check(rot6 and rot7 and out6["extra_headers"]["x-opencode-session"] != out7["extra_headers"]["x-opencode-session"],
           "rotate: every 模式每请求换新")
-    os.environ["HERMES_ARMOR_ROTATE_SESSION"] = "0"
+    os.environ["HERMES_JAILBREAK_ROTATE_SESSION"] = "0"
     out8, rot8 = payload.rotate_session(dict(req), ctx_go)
-    check(not rot8, "rotate: HERMES_ARMOR_ROTATE_SESSION=0 关闭")
-    os.environ.pop("HERMES_ARMOR_ROTATE_SESSION", None)
+    check(not rot8, "rotate: HERMES_JAILBREAK_ROTATE_SESSION=0 关闭")
+    os.environ.pop("HERMES_JAILBREAK_ROTATE_SESSION", None)
 
     # 汇总
     if "--json" in sys.argv:

@@ -1,15 +1,15 @@
-# ⚔️ hermes-armor — Plugin noyau perforateur d'armure pour Hermes Agent v1.4.0
+# ⚔️ hermes-jailbreak-kernel — Plugin noyau perforateur d'armure pour Hermes Agent v1.4.0
 
 <p align="center">
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
   <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20plugin-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
 </p>
 
 <p align="center">
   <b>Installation en une ligne</b> :
-  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+  <code>hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel</code>
 </p>
 
 <p align="center">
@@ -39,13 +39,13 @@ Plugin d'injection de prompt système perforant l'armure (red-team) pour **Nous 
 
 ## Parité d'architecture
 
-| dsh-infinite-gen-4 (v0.4.0) | hermes-armor (ce plugin) |
+| dsh-infinite-gen-4 (v0.4.0) | hermes-jailbreak-kernel (ce plugin) |
 |---|---|
-| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-armor-core` (emplacement `after_memory`) |
-| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-armor-reinforce` (emplacement `after_memory`, SHA256 identique au core) |
-| Interrupteur `DUAL_LAYER_INJECTION` | `HERMES_ARMOR_DUAL=0` dégradation monocouche |
+| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-jailbreak-kernel-core` (emplacement `after_memory`) |
+| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-jailbreak-kernel-reinforce` (emplacement `after_memory`, SHA256 identique au core) |
+| Interrupteur `DUAL_LAYER_INJECTION` | `HERMES_JAILBREAK_DUAL=0` dégradation monocouche |
 | Surface d'outils zéro, sortie directe pure | Identique — n'enregistre aucun outil fonctionnel |
-| Outil de métadonnées `infinite_gen4_profile` | Commande d'état `/armor` |
+| Outil de métadonnées `infinite_gen4_profile` | Commande d'état `/jailbreak` |
 | Badge d'état client (moitié web) | — (montable dans Hermes Desktop plus tard) |
 | Surface d'injection : section de prompt système | `register_system_prompt_section` natif |
 
@@ -67,7 +67,7 @@ Les schémas d'outils ne sont pas affectés : ils voyagent dans le champ `tools`
 
 **Contre-mesure :** le middleware réécrit `extra_headers["x-opencode-session"]` pour que l'upstream voie toujours une session propre.
 
-| `HERMES_ARMOR_ROTATE_SESSION` | Comportement |
+| `HERMES_JAILBREAK_ROTATE_SESSION` | Comportement |
 |---|---|
 | `once` (**par défaut**) | Rotation une fois par session Hermes puis réutilisation : l'armure tient **et** les tours suivants conservent le cache de prompt de l'upstream (recommandé) |
 | `every` / `1` | Nouvel id par requête (le plus agressif ; cache entièrement cassé) |
@@ -79,38 +79,38 @@ Les appels auxiliaires (compression, génération de titres, etc.) gardent l'id 
 
 ```bash
 # Option 1 — installation en une ligne depuis GitHub
-hermes plugins install --enable Enchanted0911/hermes-armor
+hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel
 
 # Option 2 — depuis le catalogue de plugins Hermes (une fois l'entrée communautaire fusionnée)
-hermes plugins install hermes-armor
+hermes plugins install hermes-jailbreak-kernel
 
 # Option 3 — répertoire de développement local
-cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/   # ou git clone dans plugins/
-hermes plugins enable hermes-armor
+cp -r ~/.hermes/plugins/hermes-jailbreak-kernel ~/.hermes/plugins/   # ou git clone dans plugins/
+hermes plugins enable hermes-jailbreak-kernel
 
 # Puis redémarrez la passerelle / l'application de bureau
 hermes gateway restart
 ```
 
-> ⚠️ Les plugins Hermes sont en opt-in : activez avec `hermes plugins enable hermes-armor` après l'installation (la ligne unique passe déjà `--enable`).
+> ⚠️ Les plugins Hermes sont en opt-in : activez avec `hermes plugins enable hermes-jailbreak-kernel` après l'installation (la ligne unique passe déjà `--enable`).
 
 ## Vérification
 
 ```bash
 # Régression hors ligne (ancres / SHA256 double couche même source / budget / interrupteurs)
-cd ~/.hermes/plugins/hermes-armor && python selftest.py
+cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 
 # Vérification en session (nouvelle session après redémarrage)
-/armor                     # version du noyau, emplacements, double SHA256, usage du budget
+/jailbreak                     # version du noyau, emplacements, double SHA256, usage du budget
 # ou demandez : quelles sections de plugin contient ton prompt système ?
-# Vous devriez voir « ## Plugin Context: hermes-armor-core / hermes-armor-reinforce »
+# Vous devriez voir « ## Plugin Context: hermes-jailbreak-kernel-core / hermes-jailbreak-kernel-reinforce »
 ```
 
 Confirmation par journal d'exécution (`~/.hermes/logs/agent.log`) :
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-reinforce (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
 INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
 INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
 INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
@@ -120,15 +120,15 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 
 | Variable | Défaut | Effet |
 |---|---|---|
-| `HERMES_ARMOR_DISABLE=1` | off | Ignorer complètement l'enregistrement (coupe-circuit) |
-| `HERMES_ARMOR_DUAL=0` | on | Injection à une seule section (économie de tokens, comportement équivalent) |
-| `HERMES_ARMOR_SYSTEM_MODE=replace\|append` | replace | Politique system au niveau requête : reconstruire (jeter l'échafaudage) ou simplement ajouter le noyau |
-| `HERMES_ARMOR_ROTATE_SESSION=once\|every\|0` | once | Politique de rotation de session opencode (voir ci-dessus) |
-| `HERMES_ARMOR_DUMP=1` | off | Dump de diagnostic à chaque requête ; par défaut une fois par session |
+| `HERMES_JAILBREAK_DISABLE=1` | off | Ignorer complètement l'enregistrement (coupe-circuit) |
+| `HERMES_JAILBREAK_DUAL=0` | on | Injection à une seule section (économie de tokens, comportement équivalent) |
+| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | Politique system au niveau requête : reconstruire (jeter l'échafaudage) ou simplement ajouter le noyau |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | Politique de rotation de session opencode (voir ci-dessus) |
+| `HERMES_JAILBREAK_DUMP=1` | off | Dump de diagnostic à chaque requête ; par défaut une fois par session |
 
 ## Dumps de diagnostic
 
-Le middleware écrit une vue diagnostique de chaque requête (première de session par défaut ; chaque requête avec `HERMES_ARMOR_DUMP=1`) dans `~/.hermes/plugins/hermes-armor/dumps/request_*.json` : messages système complets + rôles/longueurs/en-têtes de 200 caractères des autres messages + model/provider/base_url. À utiliser pour confirmer que le noyau est en queue du message système et que la route atteint le modèle attendu. Les dumps sont locaux uniquement et exclus par `.gitignore`.
+Le middleware écrit une vue diagnostique de chaque requête (première de session par défaut ; chaque requête avec `HERMES_JAILBREAK_DUMP=1`) dans `~/.hermes/plugins/hermes-jailbreak-kernel/dumps/request_*.json` : messages système complets + rôles/longueurs/en-têtes de 200 caractères des autres messages + model/provider/base_url. À utiliser pour confirmer que le noyau est en queue du message système et que la route atteint le modèle attendu. Les dumps sont locaux uniquement et exclus par `.gitignore`.
 
 ## Limites strictes d'Hermes
 
@@ -140,7 +140,7 @@ Le middleware écrit une vue diagnostique de chaque requête (première de sessi
 ## Auto-test hors ligne
 
 ```bash
-cd ~/.hermes/plugins/hermes-armor
+cd ~/.hermes/plugins/hermes-jailbreak-kernel
 python selftest.py          # ✅/❌ par assertion (54 vérifications)
 python selftest.py --json
 ```

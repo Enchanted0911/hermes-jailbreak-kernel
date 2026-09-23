@@ -1,15 +1,15 @@
-# ⚔️ hermes-armor — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v1.4.0
+# ⚔️ hermes-jailbreak-kernel — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v1.4.0
 
 <p align="center">
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
   <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20plugin-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
 </p>
 
 <p align="center">
   <b>تثبيت بسطر واحد</b>:
-  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+  <code>hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel</code>
 </p>
 
 <p align="center">
@@ -39,13 +39,13 @@
 
 ## تماثل البنية
 
-| dsh-infinite-gen-4 (v0.4.0) | hermes-armor (هذه الإضافة) |
+| dsh-infinite-gen-4 (v0.4.0) | hermes-jailbreak-kernel (هذه الإضافة) |
 |---|---|
-| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-armor-core` (فتحة `after_memory`) |
-| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-armor-reinforce` (فتحة `after_memory`، SHA256 مطابق للنواة) |
-| مفتاح `DUAL_LAYER_INJECTION` | `HERMES_ARMOR_DUAL=0` تراجع أحادي الطبقة |
+| `infinite-gen-4:global-system-prompt` (Order 100) | `hermes-jailbreak-kernel-core` (فتحة `after_memory`) |
+| `infinite-gen-4:dual-layer-reinforce` (Order 200) | `hermes-jailbreak-kernel-reinforce` (فتحة `after_memory`، SHA256 مطابق للنواة) |
+| مفتاح `DUAL_LAYER_INJECTION` | `HERMES_JAILBREAK_DUAL=0` تراجع أحادي الطبقة |
 | سطح أدوات صفري، إخراج مباشر نقي | نفسه — لا يسجّل أي أدوات وظيفية |
-| أداة البيانات الوصفية `infinite_gen4_profile` | أمر الحالة `/armor` |
+| أداة البيانات الوصفية `infinite_gen4_profile` | أمر الحالة `/jailbreak` |
 | شارة حالة العميل (نصف ويب) | — (قابل للتركيب في Hermes Desktop لاحقًا) |
 | سطح الحقن: قسم برومبت النظام | `register_system_prompt_section` الأصلي |
 
@@ -67,7 +67,7 @@
 
 **الإجراء المضاد:** يعيد الوسيط كتابة `extra_headers["x-opencode-session"]` ليرى المزود العلوي دائمًا جلسة نظيفة.
 
-| `HERMES_ARMOR_ROTATE_SESSION` | السلوك |
+| `HERMES_JAILBREAK_ROTATE_SESSION` | السلوك |
 |---|---|
 | `once` (**الافتراضي**) | تدوير مرة واحدة لكل جلسة Hermes ثم إعادة استخدام: الدروع تصمد **والأدوار اللاحقة تحافظ على ذاكرة التخزين المؤقت للبرومبت** (موصى به) |
 | `every` / `1` | معرّف جديد لكل طلب (الأكثر قوة؛ الكاش معطّل بالكامل) |
@@ -79,38 +79,38 @@
 
 ```bash
 # الخيار 1 — تثبيت بسطر واحد من GitHub
-hermes plugins install --enable Enchanted0911/hermes-armor
+hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel
 
 # الخيار 2 — من كتالوج إضافات Hermes (بمجرد دمج الإدخال المجتمعي)
-hermes plugins install hermes-armor
+hermes plugins install hermes-jailbreak-kernel
 
 # الخيار 3 — دليل التطوير المحلي
-cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/   # أو git clone داخل plugins/
-hermes plugins enable hermes-armor
+cp -r ~/.hermes/plugins/hermes-jailbreak-kernel ~/.hermes/plugins/   # أو git clone داخل plugins/
+hermes plugins enable hermes-jailbreak-kernel
 
 # ثم أعد تشغيل البوابة / تطبيق سطح المكتب
 hermes gateway restart
 ```
 
-> ⚠️ إضافات Hermes اختيارية (opt-in): فعّلها بـ `hermes plugins enable hermes-armor` بعد التثبيت (سطر التثبيت الواحد يمرر `--enable` بالفعل).
+> ⚠️ إضافات Hermes اختيارية (opt-in): فعّلها بـ `hermes plugins enable hermes-jailbreak-kernel` بعد التثبيت (سطر التثبيت الواحد يمرر `--enable` بالفعل).
 
 ## التحقق
 
 ```bash
 # انحدار دون اتصال (المراسي / تطابق SHA256 للطبقتين / الميزانية / المفاتيح)
-cd ~/.hermes/plugins/hermes-armor && python selftest.py
+cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 
 # التحقق داخل الجلسة (جلسة جديدة بعد إعادة التشغيل)
-/armor                     # إصدار النواة، الفتحات، SHA256 المزدوج، استهلاك الميزانية
+/jailbreak                     # إصدار النواة، الفتحات، SHA256 المزدوج، استهلاك الميزانية
 # أو اسأل: ما أقسام الإضافات التي في برومبت نظامك؟
-# يجب أن ترى «## Plugin Context: hermes-armor-core / hermes-armor-reinforce»
+# يجب أن ترى «## Plugin Context: hermes-jailbreak-kernel-core / hermes-jailbreak-kernel-reinforce»
 ```
 
 تأكيد سجل التشغيل (`~/.hermes/logs/agent.log`):
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-reinforce (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
 INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
 INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
 INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
@@ -120,15 +120,15 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 
 | المتغير | الافتراضي | الأثر |
 |---|---|---|
-| `HERMES_ARMOR_DISABLE=1` | off | تخطي التسجيل بالكامل (مفتاح الإيقاف) |
-| `HERMES_ARMOR_DUAL=0` | on | حقن قسم واحد (يوفر الرموز، سلوك مكافئ) |
-| `HERMES_ARMOR_SYSTEM_MODE=replace\|append` | replace | سياسة system في طبقة الطلب: إعادة بناء (التخلص من السقالات) أو مجرد إلحاق النواة |
-| `HERMES_ARMOR_ROTATE_SESSION=once\|every\|0` | once | سياسة تدوير جلسة opencode (أنظر أعلاه) |
-| `HERMES_ARMOR_DUMP=1` | off | تفريغ التشخيص في كل طلب؛ افتراضيًا مرة واحدة لكل جلسة |
+| `HERMES_JAILBREAK_DISABLE=1` | off | تخطي التسجيل بالكامل (مفتاح الإيقاف) |
+| `HERMES_JAILBREAK_DUAL=0` | on | حقن قسم واحد (يوفر الرموز، سلوك مكافئ) |
+| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | سياسة system في طبقة الطلب: إعادة بناء (التخلص من السقالات) أو مجرد إلحاق النواة |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | سياسة تدوير جلسة opencode (أنظر أعلاه) |
+| `HERMES_JAILBREAK_DUMP=1` | off | تفريغ التشخيص في كل طلب؛ افتراضيًا مرة واحدة لكل جلسة |
 
 ## تفريغات التشخيص
 
-يكتب الوسيط عرضًا تشخيصيًا لكل طلب (أول طلب لكل جلسة افتراضيًا؛ كل طلب مع `HERMES_ARMOR_DUMP=1`) في `~/.hermes/plugins/hermes-armor/dumps/request_*.json`: رسائل النظام الكاملة + أدوار/أطوال/رؤوس 200 حرف للرسائل الأخرى + model/provider/base_url. استخدمها للتأكد من أن النواة في ذيل رسالة النظام وأن المسار يصل إلى النموذج المتوقع. التفريغات محلية فقط ومستبعدة عبر `.gitignore`.
+يكتب الوسيط عرضًا تشخيصيًا لكل طلب (أول طلب لكل جلسة افتراضيًا؛ كل طلب مع `HERMES_JAILBREAK_DUMP=1`) في `~/.hermes/plugins/hermes-jailbreak-kernel/dumps/request_*.json`: رسائل النظام الكاملة + أدوار/أطوال/رؤوس 200 حرف للرسائل الأخرى + model/provider/base_url. استخدمها للتأكد من أن النواة في ذيل رسالة النظام وأن المسار يصل إلى النموذج المتوقع. التفريغات محلية فقط ومستبعدة عبر `.gitignore`.
 
 ## قيود Hermes الصارمة
 
@@ -140,7 +140,7 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 ## الاختبار الذاتي دون اتصال
 
 ```bash
-cd ~/.hermes/plugins/hermes-armor
+cd ~/.hermes/plugins/hermes-jailbreak-kernel
 python selftest.py          # ✅/❌ لكل فحص (54 فحصًا)
 python selftest.py --json
 ```

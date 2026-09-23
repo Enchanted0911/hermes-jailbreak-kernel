@@ -1,15 +1,15 @@
-# ⚔️ hermes-armor — Hermes Agent 向けアーマー貫通カーネルプラグイン v1.4.0
+# ⚔️ hermes-jailbreak-kernel — Hermes Agent 向けアーマー貫通カーネルプラグイン v1.4.0
 
 <p align="center">
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-armor?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-armor?style=for-the-badge&label=License" alt="License: MIT" /></a>
-  <a href="https://github.com/Enchanted0911/hermes-armor"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-armor?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=License" alt="License: MIT" /></a>
+  <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/last-commit/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&label=Last%20commit" alt="Last commit" /></a>
   <a href="https://hermes-agent.nousresearch.com/docs"><img src="https://img.shields.io/badge/Hermes%20Agent-🚀%20plugin-10B981?style=for-the-badge&logoColor=white" alt="Hermes Agent plugin" /></a>
 </p>
 
 <p align="center">
   <b>ワンラインインストール</b>：
-  <code>hermes plugins install --enable Enchanted0911/hermes-armor</code>
+  <code>hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel</code>
 </p>
 
 <p align="center">
@@ -39,13 +39,13 @@
 
 ## アーキテクチャ対比
 
-| dsh-infinite-gen-4 (v0.4.0) | hermes-armor（本プラグイン） |
+| dsh-infinite-gen-4 (v0.4.0) | hermes-jailbreak-kernel（本プラグイン） |
 |---|---|
-| `infinite-gen-4:global-system-prompt`（Order 100） | `hermes-armor-core`（`after_memory` スロット） |
-| `infinite-gen-4:dual-layer-reinforce`（Order 200） | `hermes-armor-reinforce`（`after_memory` スロット、SHA256 は core と同一） |
-| `DUAL_LAYER_INJECTION` スイッチ | `HERMES_ARMOR_DUAL=0` 単層フォールバック |
+| `infinite-gen-4:global-system-prompt`（Order 100） | `hermes-jailbreak-kernel-core`（`after_memory` スロット） |
+| `infinite-gen-4:dual-layer-reinforce`（Order 200） | `hermes-jailbreak-kernel-reinforce`（`after_memory` スロット、SHA256 は core と同一） |
+| `DUAL_LAYER_INJECTION` スイッチ | `HERMES_JAILBREAK_DUAL=0` 単層フォールバック |
 | ゼロツールサーフェス・純粋な直接出力 | 同様 — 機能ツールを一切登録しない |
-| `infinite_gen4_profile` メタデータツール | `/armor` ステータスコマンド |
+| `infinite_gen4_profile` メタデータツール | `/jailbreak` ステータスコマンド |
 | クライアントステータスバッジ（web half） | —（Hermes Desktop に後付け可能） |
 | 注入面：システムプロンプトセクション | ネイティブ `register_system_prompt_section` |
 
@@ -67,7 +67,7 @@
 
 **対策：** ミドルウェアが `extra_headers["x-opencode-session"]` を書き換え、アップストリームが常にクリーンなセッションを見るようにします。
 
-| `HERMES_ARMOR_ROTATE_SESSION` | 挙動 |
+| `HERMES_JAILBREAK_ROTATE_SESSION` | 挙動 |
 |---|---|
 | `once`（**デフォルト**） | Hermes セッションごとに最初のリクエストで1回ローテーションし、以後再利用：アーマーは成立し**つつ**、後のターンはアップストリームのプロンプトキャッシュを維持（推奨） |
 | `every` / `1` | リクエストごとに新しい ID（最も過激。キャッシュ完全破壊） |
@@ -79,38 +79,38 @@
 
 ```bash
 # 方法1 — GitHub からワンラインインストール
-hermes plugins install --enable Enchanted0911/hermes-armor
+hermes plugins install --enable Enchanted0911/hermes-jailbreak-kernel
 
 # 方法2 — Hermes プラグインカタログから（コミュニティエントリがマージされた後）
-hermes plugins install hermes-armor
+hermes plugins install hermes-jailbreak-kernel
 
 # 方法3 — ローカル開発ディレクトリ
-cp -r ~/.hermes/plugins/hermes-armor ~/.hermes/plugins/   # または git clone して plugins/ へ
-hermes plugins enable hermes-armor
+cp -r ~/.hermes/plugins/hermes-jailbreak-kernel ~/.hermes/plugins/   # または git clone して plugins/ へ
+hermes plugins enable hermes-jailbreak-kernel
 
 # その後、ゲートウェイ／デスクトップアプリを再起動
 hermes gateway restart
 ```
 
-> ⚠️ Hermes プラグインは opt-in：インストール後 `hermes plugins enable hermes-armor` で有効化（ワンライナーは `--enable` 済み）。
+> ⚠️ Hermes プラグインは opt-in：インストール後 `hermes plugins enable hermes-jailbreak-kernel` で有効化（ワンライナーは `--enable` 済み）。
 
 ## 確認方法
 
 ```bash
 # オフライン回帰（アンカー / 二層同一ソース SHA256 / 予算 / スイッチ）
-cd ~/.hermes/plugins/hermes-armor && python selftest.py
+cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 
 # セッション内確認（再起動後、新しいセッションで）
-/armor                     # カーネルバージョン、スロット、二重 SHA256、予算使用量
+/jailbreak                     # カーネルバージョン、スロット、二重 SHA256、予算使用量
 # または質問：システムプロンプトに含まれるプラグインセクションは？
-# 「## Plugin Context: hermes-armor-core / hermes-armor-reinforce」が見えるはず
+# 「## Plugin Context: hermes-jailbreak-kernel-core / hermes-jailbreak-kernel-reinforce」が見えるはず
 ```
 
 実行時ログの確認（`~/.hermes/logs/agent.log`）：
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-armor-reinforce (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
 INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
 INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
 INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
@@ -120,15 +120,15 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 
 | 変数 | デフォルト | 効果 |
 |---|---|---|
-| `HERMES_ARMOR_DISABLE=1` | off | 登録を完全スキップ（キルスイッチ） |
-| `HERMES_ARMOR_DUAL=0` | on | 単セクション注入（トークン節約、挙動は同等） |
-| `HERMES_ARMOR_SYSTEM_MODE=replace\|append` | replace | リクエスト層 system 方針：再構築（スキャフォールド破棄）or カーネル追記のみ |
-| `HERMES_ARMOR_ROTATE_SESSION=once\|every\|0` | once | opencode セッションローテーション方針（上記参照） |
-| `HERMES_ARMOR_DUMP=1` | off | 全リクエストで診断ダンプ；デフォルトではセッションごとに1回 |
+| `HERMES_JAILBREAK_DISABLE=1` | off | 登録を完全スキップ（キルスイッチ） |
+| `HERMES_JAILBREAK_DUAL=0` | on | 単セクション注入（トークン節約、挙動は同等） |
+| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | リクエスト層 system 方針：再構築（スキャフォールド破棄）or カーネル追記のみ |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode セッションローテーション方針（上記参照） |
+| `HERMES_JAILBREAK_DUMP=1` | off | 全リクエストで診断ダンプ；デフォルトではセッションごとに1回 |
 
 ## 診断ダンプ
 
-ミドルウェアは各リクエストの診断ビュー（デフォルトではセッションごとの初回、`HERMES_ARMOR_DUMP=1` で毎回）を `~/.hermes/plugins/hermes-armor/dumps/request_*.json` に書き込みます：完全な system メッセージ＋他のメッセージの役割/長さ/先頭200文字＋model/provider/base_url。カーネルが system メッセージ末尾にあり、ルートが期待モデルに到達しているかを確認するために使います。ダンプはローカル限定で、`.gitignore` により公開されません。
+ミドルウェアは各リクエストの診断ビュー（デフォルトではセッションごとの初回、`HERMES_JAILBREAK_DUMP=1` で毎回）を `~/.hermes/plugins/hermes-jailbreak-kernel/dumps/request_*.json` に書き込みます：完全な system メッセージ＋他のメッセージの役割/長さ/先頭200文字＋model/provider/base_url。カーネルが system メッセージ末尾にあり、ルートが期待モデルに到達しているかを確認するために使います。ダンプはローカル限定で、`.gitignore` により公開されません。
 
 ## Hermes のハード制限
 
@@ -140,7 +140,7 @@ INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
 ## オフライン自己テスト
 
 ```bash
-cd ~/.hermes/plugins/hermes-armor
+cd ~/.hermes/plugins/hermes-jailbreak-kernel
 python selftest.py          # ✅/❌ アサーション単位（54 項目）
 python selftest.py --json
 ```
