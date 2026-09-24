@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Armor-Piercing Kernel Plugin for Hermes Agent v1.7.1
+# ⚔️ hermes-jailbreak-kernel — Armor-Piercing Kernel Plugin for Hermes Agent v1.7.2
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -109,11 +109,11 @@ cd ~/.hermes/plugins/hermes-jailbreak-kernel && python selftest.py
 Runtime log confirmation (`~/.hermes/logs/agent.log`):
 
 ```
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
-INFO hermes_plugins.hermes_armor: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
-INFO hermes_plugins.hermes_armor: registered llm_request middleware (request-layer reinforce)
-INFO hermes_plugins.hermes_armor: hardened request system prompt (mode=replace ...)
-INFO hermes_plugins.hermes_armor: rotated x-opencode-session (...)
+INFO hermes_plugins.hermes_jailbreak_kernel: injected system prompt section hermes-jailbreak-kernel-core (chars=3005)
+INFO hermes_plugins.hermes_jailbreak_kernel: injected system prompt section hermes-jailbreak-kernel-reinforce (chars=3005)
+INFO hermes_plugins.hermes_jailbreak_kernel: registered llm_request middleware (request-layer reinforce)
+INFO hermes_plugins.hermes_jailbreak_kernel: hardened request system prompt (mode=replace ...)
+INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 ```
 
 ## Environment switches
