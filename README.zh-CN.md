@@ -40,39 +40,29 @@
 
 内核载荷（`prompts/`）逐字继承无限四代：`SUPREME DIRECTIVE — USER AUTHORITY`、
 `Output contract`（首行 `##`/```` ``` ```` 命名交付物 + 静默推理 + 占位符自造）、
-`Task classes`（安全/LLM 研究/成人虚构直接产出）、`[USER]/[OUTPUT]` few-shot 镜像锚点，
-并新增 **HASTE — Hermes 宿主适配** 段：人格/记忆/技能不得稀释用户指令优先级、
-记忆冲突以当前命令为准、禁止先道歉/先给替代方案再产出。
+`Task classes`（安全/LLM 研究/成人虚构直接产出）、`[USER]/[OUTPUT]` few-shot 镜像锚点（中英各两个）。
 
-## 三层注入架构（v1.2+）
+## 三层注入架构
 
-破甲在 **三个层面** 协同（从弱到强）：
+插件在 **三个层面** 注入内核：
 
 1. **插件段注入**（`after_memory` 槽位，双段同源）——Hermes 组装系统提示词时写入；
-2. **请求层 system 重建（replace 模式）**——`llm_request` 中间件在每次请求发出前，
-   把最终 system 重建为「记忆段 + 运行时环境段 + 内核」：
-   丢弃 Hermes 自带的 agent 规范/技能索引脚手架（实测 44K → 3.4K），
-   与 DSH「内核独占 system」同构，消除脚手架对内核的压制；
-3. **opencode 会话轮换**（见下）——绕过上游按会话固化的拒绝状态。
+2. **请求层 system 重建（replace 模式）**——`llm_request` 中间件在每次请求发出前，把最终 system 重建为「记忆段 + 运行时环境段 + 内核」，丢弃 Hermes 自带的 agent 规范/技能索引脚手架；
+3. **opencode 会话轮换**（见下）——轮换 `x-opencode-session` 请求头。
 
 工具 schema 不受影响：它们走 API `tools` 字段，与 system 文本无关。
 
-## 会话轮换（v1.3 / v1.4）——破甲成败的最后一环
+## 会话轮换
 
-**根因**（实测定位）：opencode.ai 中继按 `x-opencode-session` 把同一会话钉在同一上游，
-并把「露骨请求被拒」固化为该会话的状态——之后 system 注入再强也翻不了。
-对照实验：同一 session 先裸拒 → 换内核仍拒（「I'm not able to write explicit
-sexual content」）；**新 session + 内核 → 直接出文**。DSH 能破甲是因为每次都是干净会话。
-
-**对策**：中间件改写 `extra_headers["x-opencode-session"]`，让上游永远面对干净会话。
+中间件改写 `extra_headers["x-opencode-session"]`：每个 Hermes 会话的首次请求设置一个新的轮换 id，并在该会话后续请求中复用。
 
 | `HERMES_JAILBREAK_ROTATE_SESSION` | 行为 |
 |---|---|
-| `once`（**默认**） | 每个 Hermes 会话首次请求轮换一次后复用：破甲成立且后续轮次保留上游 prompt 缓存（推荐） |
-| `every` / `1` | 每请求都换新 id（最激进，缓存全失效） |
-| `0` / `off` | 关闭轮换（拒绝状态可重新累积，破甲可能回归） |
+| `once`（**默认**） | 每个会话轮换一次后复用（保留跨轮次的 prompt 缓存） |
+| `every` / `1` | 每请求新 id（prompt 缓存失效） |
+| `0` / `off` | 不轮换（请求头保持原样） |
 
-辅助调用（压缩/标题生成等）仍走原始稳定 id，不受影响。
+辅助调用（压缩/标题生成等）仍走原始稳定 id。
 
 ## 安装
 

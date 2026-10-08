@@ -1,4 +1,5 @@
 # 运行时产物（诊断 dump 可能含会话内容，绝不提交）
 dumps/
 *.pyc
-__pycache__/.hermes-catalog.json
+__pycache__/
+.hermes-catalog.json
