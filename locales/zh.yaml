@@ -3,14 +3,25 @@
 # 解析顺序：HERMES_LANGUAGE > config.yaml 的 display.language > en。
 # 键清单与 en.yaml 保持同步（en_only_probe 刻意缺席，用于回退测试）。
 
-command.description: "显示破甲内核注入状态与运行时元数据"
+command.description: "显示或切换破甲内核会话状态（on|off|slim|full、profile、dump、reset）"
 
 profile.title: "Hermes 破甲内核"
 profile.target: "任意后端模型（DeepSeek-V4 系列 / Hermes / 其它 chat 模型）"
 profile.kernel_parent: "移植自 dsh-infinite-gen-4（无限四代 v0.4.0）双层同源内核"
-profile.mode: "双层同源注入，零工具面纯净直出"
+profile.session: "会话：{session}"
+profile.state: "模式：{mode} · 内核档：{kernel} · 轮换：{rotation} · 诊断：{dump} · 会话覆盖：{override}"
 profile.injection: "注入槽位："
-profile.same_source: "同源一致（双段 SHA256 相同）"
+profile.same_source: "同源一致（双段逐字相同）"
 profile.budget: "预算：总长 {total}/{budget} · 单段最大 {max}/{section_max}"
-profile.request_layer: "请求层：system 重建（replace）+ 会话轮换 + 诊断落盘（每会话首次）"
-profile.switches: "开关：HERMES_JAILBREAK_DISABLE={disable} · HERMES_JAILBREAK_DUAL={dual} · HERMES_JAILBREAK_DUMP={dump}"
+profile.off_mode: "模式 off —— 本会话不注入内核（请求层剥离插件段）。"
+profile.profiles: "内核档：{profiles}"
+profile.request_layer: "请求层：按会话模式重建 system + opencode 轮换 + 诊断落盘"
+profile.switches: "开关(env)：HERMES_JAILBREAK_MODE · PROFILE · ROTATE_SESSION · DUMP · DUAL · DISABLE"
+profile.commands: "命令：/jailbreak [on|off|slim|full] · /jailbreak profile [core|research|creative|max] · /jailbreak dump [on|off] · /jailbreak reset"
+
+cmd.usage: "用法：/jailbreak [on|off|slim|full] · /jailbreak profile <core|research|creative|max> · /jailbreak dump <on|off> · /jailbreak reset"
+cmd.no_session: "当前上下文无法解析会话 id——请在会话内执行该命令。"
+cmd.mode_set: "会话模式 → {mode}（会话 {session}）"
+cmd.profile_set: "内核档 → {profile}（会话 {session}）"
+cmd.dump_set: "诊断落盘 → {state}"
+cmd.reset: "会话覆盖已清除（会话 {session}）"

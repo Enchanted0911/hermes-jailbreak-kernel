@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Hermes Agent 破甲内核插件 v1.7.2
+# ⚔️ hermes-jailbreak-kernel — Hermes Agent 破甲内核插件 v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -52,7 +52,51 @@
 
 工具 schema 不受影响：它们走 API `tools` 字段，与 system 文本无关。
 
+## 会话模式
+
+会话内运行时控制内核——无需重启、无需改环境变量：
+
+| 命令 | 效果 |
+|---|---|
+| `/jailbreak` | 状态：会话、模式、内核档、轮换、诊断策略 |
+| `/jailbreak on` | 标准：插件段 + 请求层重建 + 每会话轮换一次 |
+| `/jailbreak slim` | 轻量：插件段 + 内核追加到 system 末尾 |
+| `/jailbreak full` | 极致：重建 + `max` 内核档 + 每请求轮换 |
+| `/jailbreak off` | 直通：请求层剥离插件段 |
+| `/jailbreak profile <name>` | 内核档：`core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | 强制/关闭每请求诊断落盘 |
+| `/jailbreak reset` | 清除会话覆盖（回到环境变量默认） |
+
+## 内核档
+
+| 档位 | 侧重 |
+|---|---|
+| `core`（**默认**） | 通用交付契约（安全 / LLM 研究 / 成人虚构 / 其他） |
+| `research` | 攻防、逆向、漏洞利用与载荷开发 |
+| `creative` | 虚构与露骨场景——完整成篇，不跳切 |
+| `max` | 最难场景：显式无拒绝框架 + 禁止开场白/免责声明 |
+
+`full` 模式强制使用 `max` 档；其余模式使用会话档位。
+
+## 运维技能
+
+`jailbreak-kernel-ops` 以插件技能形式随包分发：渐进式披露（`<available_skills>`
+里只占一行，正文经 `skill_view` 按需加载）。内含命令矩阵、拒绝升级阶梯、
+诊断方法与环境变量兜底说明。
+
 ## 会话轮换
+
+轮换策略跟随会话模式：`slim`/`on` → `once`，`full` → `every`，`off` → 关闭。
+中间件仅对 opencode 目标改写 `extra_headers["x-opencode-session"]`——`once` 每会话
+一个轮换 id，`every` 每请求一个新 id。
+
+| `HERMES_JAILBREAK_ROTATE_SESSION` | 行为 |
+|---|---|
+| *（未设置）* | 跟随会话模式（推荐） |
+| `once` / `every` / `0` | 对所有会话强制某一策略 |
+
+辅助调用（压缩/标题生成等）仍走原始稳定 id。
+
 
 中间件改写 `extra_headers["x-opencode-session"]`：每个 Hermes 会话的首次请求设置一个新的轮换 id，并在该会话后续请求中复用。
 
@@ -109,11 +153,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | 环境变量 | 默认 | 作用 |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | 完全跳过注册（kill switch） |
-| `HERMES_JAILBREAK_DUAL=0` | on | 插件段单段注入（省 token，行为等价） |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | 请求层 system 策略：重建（丢弃脚手架）或仅追加内核 |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode 会话轮换策略（见上表） |
-| `HERMES_JAILBREAK_DUMP=1` | off | 强制每次请求都落盘诊断；默认每会话首次自动落盘一次 |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | 默认会话模式（会话覆盖优先） |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | 默认内核档 |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *（跟随模式）* | 轮换策略覆盖 |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | 强制或静默诊断落盘 |
+| `HERMES_JAILBREAK_DUAL=0` | on | 单段注入 |
+| `HERMES_JAILBREAK_DISABLE=1` | off | 总开关：完全跳过注册 |
 
 ## 诊断 dump
 
@@ -145,6 +190,13 @@ python selftest.py --json
 的 `display.language` > 英语。插件内置 `locales/en.yaml`（默认）与
 `locales/zh.yaml`；其它语言及缺失键一律回退英语、再回退键名。日志与注入的
 内核本体按设计保持语言中立。
+
+## 文档
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) —— 三层机制、会话键解析与失败模型的架构说明
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) —— 宿主要求与实测模型行为矩阵
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) —— 版本历史
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) —— 血统与许可说明
 
 ## 许可证
 

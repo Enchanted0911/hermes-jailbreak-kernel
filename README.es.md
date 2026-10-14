@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Plugin de núcleo perforador de armadura para Hermes Agent v1.7.2
+# ⚔️ hermes-jailbreak-kernel — Plugin de núcleo perforador de armadura para Hermes Agent v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -61,17 +61,53 @@ El plugin inyecta el núcleo en **tres capas**:
 
 Los esquemas de herramientas no se ven afectados: viajan en el campo `tools` de la API, no en el texto del system.
 
+## Modos de sesión
+
+Controla el núcleo por sesión en tiempo de ejecución — sin reinicios ni cambios de entorno:
+
+| Comando | Efecto |
+|---|---|
+| `/jailbreak` | estado: sesión, modo, perfil de núcleo, rotación, política de dump |
+| `/jailbreak on` | estándar: secciones + reconstrucción en la capa de solicitud + rotación `once` |
+| `/jailbreak slim` | ligero: secciones + núcleo añadido al final del system |
+| `/jailbreak full` | extremo: reconstrucción + perfil `max` + rotación en cada solicitud |
+| `/jailbreak off` | paso directo: secciones eliminadas en la capa de solicitud |
+| `/jailbreak profile <name>` | perfil de núcleo: `core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | forzar o silenciar los diagnósticos por solicitud |
+| `/jailbreak reset` | limpiar las anulaciones de la sesión (volver a los valores de entorno) |
+
+## Perfiles de núcleo
+
+| Perfil | Enfoque |
+|---|---|
+| `core` (**predeterminado**) | contrato general de entrega (seguridad / investigación LLM / ficción adulta / otros) |
+| `research` | seguridad ofensiva, ingeniería inversa, exploits y payloads |
+| `creative` | ficción y escenas explícitas — borradores completos, sin elipsis |
+| `max` | casos más difíciles: marco explícito sin rechazos y prohibición de preámbulos |
+
+El modo `full` fuerza el perfil `max`; en el resto se aplica el perfil de la sesión.
+
+## Skill de operación
+
+`jailbreak-kernel-ops` se distribuye como skill del plugin: divulgación progresiva (una
+línea en `<available_skills>`, cuerpo cargado a demanda con `skill_view`). Incluye la
+matriz de comandos, la escalera de escalado ante rechazos, diagnósticos y los valores
+de entorno de respaldo.
+
 ## Rotación de sesión
 
-El middleware reescribe `extra_headers["x-opencode-session"]`: en la primera solicitud de cada sesión de Hermes establece un id rotado y lo reutiliza durante el resto de la sesión.
+La rotación sigue el modo de la sesión: `once` para `slim`/`on`, `every` para `full`,
+desactivada para `off`. El middleware reescribe `extra_headers["x-opencode-session"]`
+solo para objetivos opencode — un id rotado por sesión en `once`, un id nuevo por
+solicitud en `every`.
 
 | `HERMES_JAILBREAK_ROTATE_SESSION` | Comportamiento |
 |---|---|
-| `once` (**predeterminado**) | rotar una vez por sesión de Hermes y luego reutilizar (conserva la caché de prompt del upstream entre turnos) |
-| `every` / `1` | nuevo id por solicitud (rompe la caché de prompt del upstream) |
-| `0` / `off` | sin rotación (el encabezado se deja intacto) |
+| *(sin definir)* | seguir el modo de la sesión (recomendado) |
+| `once` / `every` / `0` | forzar una política para todas las sesiones |
 
-Las llamadas auxiliares (compresión, generación de títulos, etc.) mantienen el id estable original.
+Las llamadas auxiliares (compresión, generación de títulos, etc.) mantienen el id
+estable original.
 
 ## Instalación
 
@@ -118,11 +154,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | Variable | Predeterminado | Efecto |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | Omitir el registro por completo (interruptor de apagado) |
-| `HERMES_JAILBREAK_DUAL=0` | on | Inyección de una sola sección (ahorra tokens, comportamiento equivalente) |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | Política de system en la capa de solicitud: reconstruir (descartar andamiaje) o solo añadir núcleo |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | Política de rotación de sesión de opencode (ver arriba) |
-| `HERMES_JAILBREAK_DUMP=1` | off | Volcar diagnóstico en cada solicitud; por defecto una vez por sesión |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | modo de sesión predeterminado (la anulación de sesión manda) |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | perfil de núcleo predeterminado |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *(modo)* | anulación de la política de rotación |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | forzar o silenciar diagnósticos |
+| `HERMES_JAILBREAK_DUAL=0` | on | inyección de una sola sección |
+| `HERMES_JAILBREAK_DISABLE=1` | off | interruptor de apagado: omitir el registro |
 
 ## Volcados de diagnóstico
 
@@ -151,6 +188,13 @@ siguen el estándar [`agent/i18n`](https://github.com/NousResearch/hermes-agent/
 incluye `locales/en.yaml` (predeterminado) y `locales/zh.yaml`; cualquier otro
 idioma —y cualquier clave ausente— recurre al inglés y luego a la clave literal.
 Los registros y el núcleo inyectado permanecen neutros al idioma por diseño.
+
+## Documentación
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — descripción de las tres capas, claves de sesión y modelo de fallos
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) — requisitos del host y matriz medida de comportamiento por modelo
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — historial de versiones
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — linaje y licencias
 
 ## Licencia
 

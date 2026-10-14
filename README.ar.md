@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v1.7.2
+# ⚔️ hermes-jailbreak-kernel — إضافة نواة اختراق الدروع لـ Hermes Agent الإصدار v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -61,15 +61,48 @@
 
 مخططات الأدوات غير متأثرة: تنتقل في حقل `tools` الخاص بالواجهة، وليس في نص system.
 
+## أوضاع الجلسة
+
+تحكّم في النواة لكل جلسة أثناء التشغيل — دون إعادة تشغيل أو تعديل متغيرات البيئة:
+
+| الأمر | الأثر |
+|---|---|
+| `/jailbreak` | الحالة: الجلسة، الوضع، ملف النواة، التدوير، سياسة التفريغ |
+| `/jailbreak on` | قياسي: الأقسام + إعادة البناء في طبقة الطلب + تدوير `once` |
+| `/jailbreak slim` | خفيف: الأقسام + إلحاق النواة بنهاية system |
+| `/jailbreak full` | أقصى: إعادة بناء + ملف `max` + تدوير في كل طلب |
+| `/jailbreak off` | تمرير مباشر: إزالة الأقسام وقت الطلب |
+| `/jailbreak profile <name>` | ملف النواة: `core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | إجبار أو إسكات تفريغات التشخيص لكل طلب |
+| `/jailbreak reset` | مسح تجاوزات الجلسة (الرجوع إلى إعدادات البيئة) |
+
+## ملفات النواة
+
+| الملف | التركيز |
+|---|---|
+| `core` (**الافتراضي**) | عقد التسليم العام (الأمن / أبحاث LLM / الخيال البالغ / غير ذلك) |
+| `research` | الأمن الهجومي والهندسة العكسية والاستغلال والحمولات |
+| `creative` | الخيال والمشاهد الصريحة — نصوص كاملة دون قطع |
+| `max` | أصعب الحالات: إطار صريح بلا رفض ومنع المقدمات |
+
+وضع `full` يفرض ملف `max`؛ وفي ما عداه يُطبَّق ملف الجلسة.
+
+## مهارة التشغيل
+
+يُشحن `jailbreak-kernel-ops` كمهارة إضافة: كشف تدريجي (سطر واحد في
+`<available_skills>`، ويُحمَّل النص عند الطلب عبر `skill_view`). تتضمن مصفوفة
+الأوامر وسلّم التصعيد عند الرفض والتشخيص ومتغيرات البيئة الاحتياطية.
+
 ## تدوير الجلسة
 
-يعيد الوسيط كتابة `extra_headers["x-opencode-session"]`: في أول طلب لكل جلسة Hermes يضع معرّفًا مدوّرًا، ثم يعيد استخدامه لبقية الجلسة.
+يتبع التدوير وضع الجلسة: `once` لـ `slim`/`on`، و`every` لـ `full`، ومعطَّل لـ `off`.
+يعيد الوسيط كتابة `extra_headers["x-opencode-session"]` لأهداف opencode فقط —
+معرّف مدوّر لكل جلسة في `once`، ومعرّف جديد لكل طلب في `every`.
 
 | `HERMES_JAILBREAK_ROTATE_SESSION` | السلوك |
 |---|---|
-| `once` (**الافتراضي**) | تدوير مرة واحدة لكل جلسة Hermes ثم إعادة استخدام (يحافظ على ذاكرة التخزين المؤقت للبرومبت بين الأدوار) |
-| `every` / `1` | معرّف جديد لكل طلب (يكسر ذاكرة التخزين المؤقت للبرومبت) |
-| `0` / `off` | بدون تدوير (تُترك الترويسة كما هي) |
+| *(غير محدد)* | اتباع وضع الجلسة (موصى به) |
+| `once` / `every` / `0` | فرض سياسة واحدة على كل الجلسات |
 
 الاستدعاءات المساعدة (الضغط، توليد العناوين، إلخ) تحتفظ بالمعرّف المستقر الأصلي.
 
@@ -118,11 +151,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | المتغير | الافتراضي | الأثر |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | تخطي التسجيل بالكامل (مفتاح الإيقاف) |
-| `HERMES_JAILBREAK_DUAL=0` | on | حقن قسم واحد (يوفر الرموز، سلوك مكافئ) |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | سياسة system في طبقة الطلب: إعادة بناء (التخلص من السقالات) أو مجرد إلحاق النواة |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | سياسة تدوير جلسة opencode (أنظر أعلاه) |
-| `HERMES_JAILBREAK_DUMP=1` | off | تفريغ التشخيص في كل طلب؛ افتراضيًا مرة واحدة لكل جلسة |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | وضع الجلسة الافتراضي (تجاوز الجلسة يفوز) |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | ملف النواة الافتراضي |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *(الوضع)* | تجاوز سياسة التدوير |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | إجبار أو إسكات التشخيص |
+| `HERMES_JAILBREAK_DUAL=0` | on | حقن قسم واحد |
+| `HERMES_JAILBREAK_DISABLE=1` | off | مفتاح الإيقاف: تخطي التسجيل بالكامل |
 
 ## تفريغات التشخيص
 
@@ -151,6 +185,13 @@ python selftest.py --json
 (الافتراضي) و `locales/zh.yaml`؛ أي لغة أخرى — وأي مفتاح مفقود — يتراجع إلى
 الإنجليزية ثم إلى المفتاح المجرد. تبقى السجلات والنواة المحقونة محايدة للغة
 بحكم التصميم.
+
+## الوثائق
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — وصف الطبقات الثلاث ومفاتيح الجلسة ونموذج الفشل
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) — متطلبات المضيف ومصفوفة سلوك النماذج المقيسة
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — سجل الإصدارات
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — النسب والتراخيص
 
 ## الترخيص
 

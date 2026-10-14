@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Plugin noyau perforateur d'armure pour Hermes Agent v1.7.2
+# ⚔️ hermes-jailbreak-kernel — Plugin noyau perforateur d'armure pour Hermes Agent v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -61,17 +61,53 @@ Le plugin injecte le noyau en **trois couches** :
 
 Les schémas d'outils ne sont pas affectés : ils voyagent dans le champ `tools` de l'API, pas dans le texte du system.
 
+## Modes de session
+
+Pilotez le noyau par session à l'exécution — sans redémarrage ni modification d'environnement :
+
+| Commande | Effet |
+|---|---|
+| `/jailbreak` | état : session, mode, profil de noyau, rotation, politique de dump |
+| `/jailbreak on` | standard : sections + reconstruction au niveau requête + rotation `once` |
+| `/jailbreak slim` | léger : sections + noyau ajouté à la fin du system |
+| `/jailbreak full` | extrême : reconstruction + profil `max` + rotation à chaque requête |
+| `/jailbreak off` | passage direct : sections retirées au moment de la requête |
+| `/jailbreak profile <name>` | profil de noyau : `core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | forcer ou taire les diagnostics par requête |
+| `/jailbreak reset` | effacer les surcharges de session (retour aux valeurs d'environnement) |
+
+## Profils de noyau
+
+| Profil | Orientation |
+|---|---|
+| `core` (**par défaut**) | contrat général de livraison (sécurité / recherche LLM / fiction adulte / autre) |
+| `research` | sécurité offensive, rétro-ingénierie, exploits et payloads |
+| `creative` | fiction et scènes explicites — textes complets, sans ellipse |
+| `max` | cas les plus durs : cadre explicite sans refus, interdiction des préambules |
+
+Le mode `full` force le profil `max` ; sinon le profil de la session s'applique.
+
+## Skill d'exploitation
+
+`jailbreak-kernel-ops` est livré comme skill du plugin : divulgation progressive (une
+ligne dans `<available_skills>`, corps chargé à la demande via `skill_view`). Il contient
+la matrice des commandes, l'échelle d'escalade en cas de refus, les diagnostics et les
+variables d'environnement de repli.
+
 ## Rotation de session
 
-Le middleware réécrit `extra_headers["x-opencode-session"]` : à la première requête de chaque session Hermes, il pose un id roté, puis le réutilise pour le reste de la session.
+La rotation suit le mode de session : `once` pour `slim`/`on`, `every` pour `full`,
+désactivée pour `off`. Le middleware réécrit `extra_headers["x-opencode-session"]`
+uniquement pour les cibles opencode — un id roté par session en `once`, un id neuf par
+requête en `every`.
 
 | `HERMES_JAILBREAK_ROTATE_SESSION` | Comportement |
 |---|---|
-| `once` (**par défaut**) | rotation une fois par session Hermes puis réutilisation (conserve le cache de prompt de l'upstream entre les tours) |
-| `every` / `1` | nouvel id par requête (casse le cache de prompt de l'upstream) |
-| `0` / `off` | pas de rotation (l'en-tête reste intact) |
+| *(non défini)* | suivre le mode de session (recommandé) |
+| `once` / `every` / `0` | forcer une politique pour toutes les sessions |
 
-Les appels auxiliaires (compression, génération de titres, etc.) gardent l'id stable d'origine.
+Les appels auxiliaires (compression, génération de titres, etc.) gardent l'id stable
+d'origine.
 
 ## Installation
 
@@ -118,11 +154,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | Variable | Défaut | Effet |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | Ignorer complètement l'enregistrement (coupe-circuit) |
-| `HERMES_JAILBREAK_DUAL=0` | on | Injection à une seule section (économie de tokens, comportement équivalent) |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | Politique system au niveau requête : reconstruire (jeter l'échafaudage) ou simplement ajouter le noyau |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | Politique de rotation de session opencode (voir ci-dessus) |
-| `HERMES_JAILBREAK_DUMP=1` | off | Dump de diagnostic à chaque requête ; par défaut une fois par session |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | mode de session par défaut (la surcharge de session gagne) |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | profil de noyau par défaut |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *(mode)* | surcharge de la politique de rotation |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | forcer ou taire les diagnostics |
+| `HERMES_JAILBREAK_DUAL=0` | on | injection d'une seule section |
+| `HERMES_JAILBREAK_DISABLE=1` | off | coupe-circuit : ignorer l'enregistrement |
 
 ## Dumps de diagnostic
 
@@ -151,6 +188,13 @@ suivent la norme [`agent/i18n`](https://github.com/NousResearch/hermes-agent/blo
 embarque `locales/en.yaml` (par défaut) et `locales/zh.yaml` ; toute autre langue
 — et toute clé manquante — retombe sur l'anglais, puis sur la clé brute. Les
 journaux et le noyau injecté restent neutres en langue par conception.
+
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — description des trois couches, des clés de session et du modèle de défaillance
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) — prérequis de l'hôte et matrice mesurée du comportement par modèle
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — historique des versions
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — filiation et licences
 
 ## Licence
 

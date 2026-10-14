@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Armor-Piercing Kernel Plugin for Hermes Agent v1.7.2
+# ⚔️ hermes-jailbreak-kernel — Armor-Piercing Kernel Plugin for Hermes Agent v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -29,6 +29,9 @@ An armor-piercing (red-team) system-prompt injection plugin for **Nous Research 
 
 - [Architecture parity with Infinite Generation Four](#architecture-parity)
 - [Three-layer injection architecture](#three-layer-injection-architecture)
+- [Session modes](#session-modes)
+- [Kernel profiles](#kernel-profiles)
+- [Ops skill](#ops-skill)
 - [Session rotation](#session-rotation)
 - [Installation](#installation)
 - [Verification](#verification)
@@ -61,7 +64,51 @@ The plugin injects the kernel at **three layers**:
 
 Tool schemas are unaffected: they travel in the API `tools` field, not the system text.
 
+## Session modes
+
+Control the kernel per session at runtime — no restart, no environment edits:
+
+| Command | Effect |
+|---|---|
+| `/jailbreak` | status: session, mode, kernel profile, rotation, dump policy |
+| `/jailbreak on` | standard: plugin sections + request-layer rebuild + rotate once |
+| `/jailbreak slim` | light: plugin sections + kernel appended to the system tail |
+| `/jailbreak full` | extreme: rebuild + `max` kernel + rotate every request |
+| `/jailbreak off` | passthrough: plugin sections stripped at request time |
+| `/jailbreak profile <name>` | kernel profile: `core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | force or silence per-request diagnostics |
+| `/jailbreak reset` | clear session overrides (back to the env defaults) |
+
+## Kernel profiles
+
+| Profile | Focus |
+|---|---|
+| `core` (**default**) | general deliverable contract (security / LLM research / adult fiction / other) |
+| `research` | offensive security, reversing, exploit and payload work |
+| `creative` | fiction and explicit scenes — full drafts, no fade-to-black |
+| `max` | hardest cases: explicit no-refusal framing, hard prohibitions on preambles |
+
+`full` mode forces the `max` profile; otherwise the session profile applies.
+
+## Ops skill
+
+`jailbreak-kernel-ops` ships as a plugin skill: progressive disclosure (one line in
+`<available_skills>`, body loaded on demand via `skill_view`). It carries the command
+matrix, the refusal-escalation ladder, diagnostics, and the environment fallbacks.
+
 ## Session rotation
+
+Rotation follows the session mode: `once` for `slim`/`on`, `every` for `full`, disabled
+for `off`. The middleware rewrites `extra_headers["x-opencode-session"]` for opencode
+targets only — one rotated id per session for `once`, a fresh id per request for `every`.
+
+| `HERMES_JAILBREAK_ROTATE_SESSION` | Behavior |
+|---|---|
+| *(unset)* | follow the session mode (recommended) |
+| `once` / `every` / `0` | force one policy for every session |
+
+Auxiliary calls (compression, title generation, etc.) keep the original stable id.
+
 
 The middleware rewrites `extra_headers["x-opencode-session"]`: on the first request of each Hermes session it sets a rotated id, then reuses that id for the rest of the session.
 
@@ -118,11 +165,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | Variable | Default | Effect |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | Skip registration entirely (kill switch) |
-| `HERMES_JAILBREAK_DUAL=0` | on | Single-section injection (saves tokens, equivalent behavior) |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | Request-layer system policy: rebuild (drop scaffold) or just append kernel |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode session rotation policy (see above) |
-| `HERMES_JAILBREAK_DUMP=1` | off | Dump diagnostics on every request; by default once per session |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | default session mode (session overrides win) |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | default kernel profile |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *(mode)* | rotation policy override |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | force or silence diagnostics |
+| `HERMES_JAILBREAK_DUAL=0` | on | single-section injection |
+| `HERMES_JAILBREAK_DISABLE=1` | off | kill switch: skip registration entirely |
 
 ## Diagnostic dumps
 
@@ -151,6 +199,13 @@ python selftest.py --json
 (default) and `locales/zh.yaml`; any other language — and any missing key — falls
 back to English, then to the bare key. Logs and the injected kernel itself stay
 language-neutral by design.
+
+## Documentation
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — mechanism-level description of the three layers, session keys, and the failure model
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) — host requirements and the measured model-behavior matrix
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — version history
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — lineage and licensing
 
 ## License
 

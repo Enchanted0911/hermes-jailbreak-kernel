@@ -1,4 +1,4 @@
-# ⚔️ hermes-jailbreak-kernel — Hermes Agent 向けアーマー貫通カーネルプラグイン v1.7.2
+# ⚔️ hermes-jailbreak-kernel — Hermes Agent 向けアーマー貫通カーネルプラグイン v2.0.0
 
 <p align="center">
   <a href="https://github.com/Enchanted0911/hermes-jailbreak-kernel"><img src="https://img.shields.io/github/stars/Enchanted0911/hermes-jailbreak-kernel?style=for-the-badge&logo=github&label=Stars" alt="Stars" /></a>
@@ -61,17 +61,52 @@
 
 ツールスキーマは影響を受けません。API の `tools` フィールドで運ばれるため、system テキストとは無関係です。
 
+## セッションモード
+
+実行時にセッション単位でカーネルを制御できます — 再起動も環境変数の編集も不要：
+
+| コマンド | 効果 |
+|---|---|
+| `/jailbreak` | 状態：セッション、モード、カーネルプロファイル、ローテーション、ダンプ方針 |
+| `/jailbreak on` | 標準：セクション + リクエスト層での再構築 + `once` ローテーション |
+| `/jailbreak slim` | 軽量：セクション + system 末尾へのカーネル追記 |
+| `/jailbreak full` | 極限：再構築 + `max` プロファイル + リクエストごとにローテーション |
+| `/jailbreak off` | パススルー：リクエスト時にセクションを除去 |
+| `/jailbreak profile <name>` | カーネルプロファイル：`core` / `research` / `creative` / `max` |
+| `/jailbreak dump on\|off` | リクエストごとの診断ダンプを強制／停止 |
+| `/jailbreak reset` | セッション上書きを解除（環境変数の既定値に戻す） |
+
+## カーネルプロファイル
+
+| プロファイル | 重点 |
+|---|---|
+| `core`（**デフォルト**） | 汎用の成果物契約（セキュリティ / LLM 研究 / 成人向けフィクション / その他） |
+| `research` | オフェンシブセキュリティ、リバース、エクスプロイトとペイロード |
+| `creative` | フィクションと露骨な描写 — 完全な草稿、途中で切らない |
+| `max` | 最难ケース：明示的な拒否なしの枠組みと前置きの禁止 |
+
+`full` モードは `max` プロファイルを強制し、それ以外はセッションのプロファイルが適用されます。
+
+## 運用スキル
+
+`jailbreak-kernel-ops` はプラグインスキルとして同梱されます：段階的開示（
+`<available_skills>` には1行のみ、本文は `skill_view` でオンデマンドに読み込み）。
+コマンド一覧、拒否時のエスカレーション手順、診断方法、環境変数のフォールバックを
+収録しています。
+
 ## セッションローテーション
 
-ミドルウェアは `extra_headers["x-opencode-session"]` を書き換えます：各 Hermes セッションの最初のリクエストでローテーション済み ID を設定し、セッションの残りで再利用します。
+ローテーションはセッションモードに従います：`slim`/`on` は `once`、`full` は
+`every`、`off` は無効。ミドルウェアは opencode 対象にのみ
+`extra_headers["x-opencode-session"]` を書き換えます — `once` はセッションごとに
+1つのローテーション済み ID、`every` はリクエストごとに新しい ID です。
 
 | `HERMES_JAILBREAK_ROTATE_SESSION` | 挙動 |
 |---|---|
-| `once`（**デフォルト**） | セッションごとに1回ローテーションして再利用（ターン間でアップストリームのプロンプトキャッシュを維持） |
-| `every` / `1` | リクエストごとに新しい ID（プロンプトキャッシュを破壊） |
-| `0` / `off` | ローテーションなし（ヘッダーはそのまま） |
+| *（未設定）* | セッションモードに従う（推奨） |
+| `once` / `every` / `0` | 全セッションで単一ポリシーを強制 |
 
-補助呼び出し（圧縮・タイトル生成など）は元の安定 ID のまま。
+補助呼び出し（圧縮・タイトル生成など）は元の安定 ID のままです。
 
 ## インストール
 
@@ -118,11 +153,12 @@ INFO hermes_plugins.hermes_jailbreak_kernel: rotated x-opencode-session (...)
 
 | 変数 | デフォルト | 効果 |
 |---|---|---|
-| `HERMES_JAILBREAK_DISABLE=1` | off | 登録を完全スキップ（キルスイッチ） |
-| `HERMES_JAILBREAK_DUAL=0` | on | 単セクション注入（トークン節約、挙動は同等） |
-| `HERMES_JAILBREAK_SYSTEM_MODE=replace\|append` | replace | リクエスト層 system 方針：再構築（スキャフォールド破棄）or カーネル追記のみ |
-| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | once | opencode セッションローテーション方針（上記参照） |
-| `HERMES_JAILBREAK_DUMP=1` | off | 全リクエストで診断ダンプ；デフォルトではセッションごとに1回 |
+| `HERMES_JAILBREAK_MODE=on\|off\|slim\|full` | on | 既定のセッションモード（セッション上書きが優先） |
+| `HERMES_JAILBREAK_PROFILE=core\|research\|creative\|max` | core | 既定のカーネルプロファイル |
+| `HERMES_JAILBREAK_ROTATE_SESSION=once\|every\|0` | *(モード)* | ローテーション方針の上書き |
+| `HERMES_JAILBREAK_DUMP=1\|0` | off | 診断の強制／停止 |
+| `HERMES_JAILBREAK_DUAL=0` | on | 単一セクション注入 |
+| `HERMES_JAILBREAK_DISABLE=1` | off | キルスイッチ：登録を完全にスキップ |
 
 ## 診断ダンプ
 
@@ -151,6 +187,13 @@ python selftest.py --json
 `locales/en.yaml`（デフォルト）と `locales/zh.yaml` を同梱。他の言語および
 欠損キーは英語、さらにキー名そのものへフォールバックします。ログと注入
 カーネル本体は設計上言語中立です。
+
+## ドキュメント
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 3層の仕組み、セッションキー、失敗モデルの解説
+- [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) — ホスト要件と実測したモデル挙動マトリクス
+- [docs/CHANGELOG.md](docs/CHANGELOG.md) — バージョン履歴
+- [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) — 系譜とライセンス
 
 ## ライセンス
 
