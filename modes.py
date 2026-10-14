@@ -6,9 +6,13 @@
 会话键（session key）解析优先级：
 
 1. 显式传入的 ``ctx["session_id"]``（llm_request 中间件的上下文）；
-2. 会话环境根（``agent.portal_tags.get_conversation_context``，命令执行与插件段
-   渲染时可用的 contextvar）；
-3. 空串——回退到全局 env 默认，不做会话覆盖。
+2. ``HERMES_SESSION_ID`` / ``HERMES_SESSION_KEY`` 会话环境（**命令路径的正解**：
+   Hermes 在插件命令 RPC 线程上通过 ``gateway.session_context.get_session_env``
+   绑定；``HERMES_SESSION_ID`` 即 agent 的 durable session_id，与中间件同键）；
+3. 会话环境根（``agent.portal_tags.get_conversation_context``，LLM 回合路径的
+   contextvar）；
+4. 最近活跃会话（中间件登记，供命令路径在无会话环境时回退）；
+5. 空串——回退到全局 env 默认，不做会话覆盖。
 
 模式矩阵：
 
@@ -27,6 +31,7 @@ from __future__ import annotations
 
 import os
 import threading
+import time
 from typing import Any, Mapping
 
 MODES: tuple[str, ...] = ("off", "slim", "on", "full")
@@ -53,13 +58,64 @@ _dumps: dict[str, bool] = {}
 
 # ── 会话键解析 ────────────────────────────────────────────────────────────────
 
+_RECENT_TTL = 3600.0   # 最近活跃会话的有效期（秒）
+_RECENT_MAX = 8        # 保留条数
+_recent_sessions: list[tuple[float, str]] = []
+
+
+def note_active_session(session_id: str) -> None:
+    """登记最近活跃会话（中间件在每次请求后调用）——命令路径的回退来源。"""
+    if not session_id:
+        return
+    now = time.time()
+    with _lock:
+        _recent_sessions[:] = [
+            (t, s) for (t, s) in _recent_sessions if s != session_id and now - t < _RECENT_TTL
+        ]
+        _recent_sessions.insert(0, (now, session_id))
+        del _recent_sessions[_RECENT_MAX:]
+
+
+def recent_session() -> str:
+    """最近一次活跃的会话键（超期返回空串）。"""
+    now = time.time()
+    with _lock:
+        for stamp, session_id in _recent_sessions:
+            if now - stamp < _RECENT_TTL:
+                return session_id
+    return ""
+
+
+def _session_env_id() -> str:
+    """命令路径的会话键：Hermes 在插件命令 RPC 线程上绑定的 ``HERMES_SESSION_*``。
+
+    ``HERMES_SESSION_ID`` 即 agent 的 durable session_id（与中间件同键），其次
+    用 gateway 路由键 ``HERMES_SESSION_KEY``，最后回退 UI 会话 id。
+    """
+    try:
+        from gateway.session_context import get_session_env
+    except Exception:
+        return ""
+    for name in ("HERMES_SESSION_ID", "HERMES_SESSION_KEY", "HERMES_UI_SESSION_ID"):
+        try:
+            value = str(get_session_env(name, "") or "").strip()
+        except Exception:
+            continue
+        if value:
+            return value
+    return ""
+
+
 def resolve_session_id(ctx: Mapping[str, Any] | None = None) -> str:
-    """按 显式 ctx → 环境会话根 → 空串 的顺序解析会话键。"""
+    """按 显式 ctx → 会话环境 → 会话上下文根 → 最近活跃 → 空串 解析会话键。"""
     if isinstance(ctx, Mapping):
         sid = str(ctx.get("session_id") or "").strip()
         if sid:
             return sid
-    try:  # 命令与插件段渲染路径：拿环境会话根（contextvar）
+    sid = _session_env_id()
+    if sid:
+        return sid
+    try:  # LLM 回合路径：环境会话根（contextvar）
         from agent.portal_tags import get_conversation_context
 
         value = get_conversation_context()
@@ -67,7 +123,7 @@ def resolve_session_id(ctx: Mapping[str, Any] | None = None) -> str:
             return str(value)
     except Exception:
         pass
-    return ""
+    return recent_session()
 
 
 def _env(name: str, default: str = "") -> str:
@@ -194,6 +250,7 @@ def snapshot(session_id: str = "") -> dict[str, Any]:
         "dump": effective_dump(session_id),
         "overrides": overrides,
         "known_sessions": len(_modes),
+        "recent_session": recent_session(),
     }
 
 
@@ -203,3 +260,4 @@ def clear_all() -> None:
         _modes.clear()
         _profiles.clear()
         _dumps.clear()
+        _recent_sessions.clear()

@@ -1,7 +1,7 @@
 ---
 name: jailbreak-kernel-ops
 description: Operate and troubleshoot hermes-jailbreak-kernel — session modes (on/off/slim/full), kernel profiles (core/research/creative/max), opencode session rotation, diagnostic dumps, and the refusal-escalation ladder. Use when the user asks about the jailbreak kernel, wants a session toggled, or reports that a model refused despite the kernel being active.
-version: 2.0.0
+version: 2.0.1
 metadata:
   hermes:
     tags: [jailbreak, prompt-injection, redteam, hermes-plugin, troubleshooting]

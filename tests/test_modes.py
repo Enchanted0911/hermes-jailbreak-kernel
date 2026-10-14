@@ -95,10 +95,50 @@ def run(check) -> None:
         check(snap2["mode"] == "on" and snap2["overrides"]["mode"] is None, "reset clears overrides")
         check(not modes.reset(""), "reset rejects empty session key")
 
-        # session key resolution
+        # session key resolution: ctx → session env → recent → empty
+        modes.clear_all()
         check(modes.resolve_session_id({"session_id": "abc"}) == "abc", "session id from ctx")
-        check(modes.resolve_session_id({}) == "", "no ctx and no ambient → empty")
+        check(modes.resolve_session_id({}) == "", "no source → empty")
         check(isinstance(modes.resolve_session_id(None), str), "resolve_session_id never raises")
+
+        # session env path — the plugin-command RPC binding (get_session_env)
+        import types
+        fake_pkg = types.ModuleType("gateway")
+        fake_mod = types.ModuleType("gateway.session_context")
+        stored = {"HERMES_SESSION_ID": "env-session-id", "HERMES_SESSION_KEY": "env-session-key"}
+        fake_mod.get_session_env = lambda name, default="": stored.get(name, default)
+        fake_pkg.session_context = fake_mod
+        saved_gateway = sys.modules.get("gateway")
+        saved_sc = sys.modules.get("gateway.session_context")
+        sys.modules["gateway"] = fake_pkg
+        sys.modules["gateway.session_context"] = fake_mod
+        try:
+            check(modes.resolve_session_id({}) == "env-session-id",
+                  "session id from HERMES_SESSION_ID (command path)")
+            stored.pop("HERMES_SESSION_ID")
+            check(modes.resolve_session_id({}) == "env-session-key",
+                  "falls back to HERMES_SESSION_KEY")
+            stored.clear()
+        finally:
+            if saved_gateway is not None:
+                sys.modules["gateway"] = saved_gateway
+            else:
+                sys.modules.pop("gateway", None)
+            if saved_sc is not None:
+                sys.modules["gateway.session_context"] = saved_sc
+            else:
+                sys.modules.pop("gateway.session_context", None)
+
+        # most-recent-active fallback (middleware registration)
+        modes.note_active_session("recent-session-id")
+        check(modes.resolve_session_id({}) == "recent-session-id",
+              "falls back to most recent active session")
+        check(modes.snapshot("")["recent_session"] == "recent-session-id",
+              "snapshot exposes recent session")
+        modes.note_active_session("another-session")
+        check(modes.resolve_session_id({}) == "another-session", "latest session wins")
+        modes.clear_all()
+        check(modes.resolve_session_id({}) == "", "clear_all drops recent sessions")
     finally:
         _clear_env()
         modes.clear_all()

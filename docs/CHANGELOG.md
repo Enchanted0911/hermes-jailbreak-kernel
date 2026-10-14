@@ -1,5 +1,17 @@
 # Changelog — hermes-jailbreak-kernel
 
+## v2.0.1
+
+- **Session key resolution fixed for slash commands**: plugin commands run on the
+  RPC/worker thread where the turn-path contextvar is not bound, so `/jailbreak <mode>`
+  could previously report "no resolvable session id". Resolution now reads the standard
+  plugin-command binding first (`HERMES_SESSION_ID` → `HERMES_SESSION_KEY` →
+  `HERMES_UI_SESSION_ID` via `gateway.session_context.get_session_env`), then the
+  conversation root, then the most recent active session registered by the middleware.
+  `HERMES_SESSION_ID` equals the durable session id the middleware sees, so both paths
+  share one state space.
+- `snapshot()` exposes `recent_session` for diagnostics.
+
 ## v2.0.0
 
 Session-level control and scenario profiles (informed by the engineering patterns of

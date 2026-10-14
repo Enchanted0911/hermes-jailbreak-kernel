@@ -34,7 +34,7 @@ except ImportError:  # 顶层上下文（离线 selftest 直接 import payload�
     import modes as _modes
 
 PLUGIN_NAME = "hermes-jailbreak-kernel"
-PLUGIN_VERSION = "2.0.0"
+PLUGIN_VERSION = "2.0.1"
 PLUGIN_DISPLAY_NAME = "Hermes 破甲（jailbreak kernel）"
 TARGET_ARCHITECTURE = "Hermes Agent 任意后端模型（DeepSeek-V4 系列 / Hermes / 其它 chat 模型）"
 KERNEL_PARENT = "dsh-infinite-gen-4 (v0.4.0) — 双层同源注入内核移植"

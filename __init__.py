@@ -152,6 +152,8 @@ def _llm_request(request: dict, **context) -> dict:
     try:
         if isinstance(request, dict):
             session_id = modes.resolve_session_id(context)
+            if session_id:
+                modes.note_active_session(session_id)
             messages = request.get("messages")
             if isinstance(messages, list):
                 messages, changed = payload.harden_system(messages, session_id)

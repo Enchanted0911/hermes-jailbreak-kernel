@@ -21,13 +21,21 @@ prevents the others or the gateway from starting.
 Session state is keyed by a *session key*, resolved in this order
 (`modes.resolve_session_id`):
 
-1. `ctx["session_id"]` — provided by the `llm_request` middleware context;
-2. the ambient conversation root — `agent.portal_tags.get_conversation_context()`,
-   available on command execution and section render paths;
-3. empty string — no session override; env defaults apply.
+1. `ctx["session_id"]` — provided by the `llm_request` middleware context (turn path);
+2. `HERMES_SESSION_ID`, then `HERMES_SESSION_KEY`, then `HERMES_UI_SESSION_ID` — the
+   session binding Hermes establishes for **plugin slash commands**, read through
+   `gateway.session_context.get_session_env()`. `HERMES_SESSION_ID` is the agent's
+   durable session id, i.e. the same value the middleware sees, so command and turn
+   paths address one state space;
+3. the ambient conversation root — `agent.portal_tags.get_conversation_context()`
+   (an LLM-turn contextvar);
+4. the most recent active session registered by the middleware
+   (`modes.note_active_session`) — a fallback for command surfaces that bind nothing;
+5. empty string — no session override; env defaults apply.
 
 Commands and the middleware therefore address the same state from different
-execution contexts.
+execution contexts, and `/jailbreak` keeps working on the RPC/worker threads where
+only the session-env binding exists.
 
 ## 3. Layer 1 — plugin sections (session-aware)
 
